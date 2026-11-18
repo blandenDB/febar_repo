@@ -1,0 +1,48 @@
+resources:
+  experiments:
+    cross_sell:
+      name: /Users/${workspace.current_user.userName}/c360_cross_sell
+
+  jobs:
+    c360_ml:
+      name: c360_ml
+      description: CLV assumptions, then train the cross-sell propensity model, register it in UC and score recommendations
+      tasks:
+        - task_key: clv_assumptions
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/ai/01_clv_assumptions.sql
+              source: WORKSPACE
+        - task_key: train_and_score
+          depends_on:
+            - task_key: clv_assumptions
+          environment_key: ml
+          spark_python_task:
+            python_file: ../src/ai/02_train_and_score.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema
+              - ${var.schema}
+              - --as-of
+              - "2026-10-31"
+              - --horizon-days
+              - "60"
+              - --experiment
+              - ${resources.experiments.cross_sell.name}
+        - task_key: explanations
+          depends_on:
+            - task_key: train_and_score
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/ai/03_explanations.sql
+              source: WORKSPACE
+      environments:
+        - environment_key: ml
+          spec:
+            client: "2"
+            dependencies:
+              - mlflow>=2.16
+              - scikit-learn>=1.4

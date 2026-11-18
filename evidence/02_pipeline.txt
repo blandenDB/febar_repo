@@ -1,125 +1,141 @@
-# Evidence 02: Lakeflow pipeline c360_lakeflow_pipeline (bronze, silver, quarantine, identity matching, gold)
-# Captured 2026-11-18T18:17:21Z. Synthetic data only. User identities redacted.
+# Evidence 02: Lakeflow pipeline (bronze, silver + quarantine, identity matching, gold)
+# Captured 2026-11-18T20:30:05Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-## Pipeline updates (latest first)
-8f4b804a-24b8-4b5b-ad89-8e70d906087d COMPLETED incremental 1795025717604
-ab037e62-de57-4cc2-8bdf-5f570617a523 COMPLETED full_refresh 1795025607274
-11180990-b6b1-4f4d-8fb9-5c06fa87ac73 COMPLETED incremental 1795025375885
-Note: the latest update is an incremental rerun after a full refresh; bronze row counts below are unchanged, so reruns add no duplicate rows.
+## Latest pipeline updates (newest first)
+77e8f429-6507-4296-8cfe-1e1567bb49a6  COMPLETED  incremental  2026-11-18T19:18:40Z
+5c32b371-34eb-4046-b146-c24f82609afa  COMPLETED  full_refresh  2026-11-18T19:16:32Z
+da5e8eef-ceb0-4125-98c0-c0cbae0b7157  COMPLETED  incremental  2026-11-18T19:08:27Z
+6ad6809c-e13f-4c5d-995f-5af26d297984  COMPLETED  full_refresh  2026-11-18T19:06:28Z
+3288ab52-e942-4f25-ada3-62a057238ee3  COMPLETED  incremental  2026-11-18T18:47:30Z
+An incremental update after a full refresh leaves bronze row counts unchanged (no duplicate rows on rerun).
 
-$ python3 tools/run_sql.py --profile febar --warehouse <id> tools/checks/02_pipeline.sql
 ## Row counts per layer
 table_name                     row_count
 -----------------------------  ---------
+gold_product_holdings          161160   
+gold_digital_product_interest  41397    
+gold_customer_360              50195    
 bronze_core_customers          51000    
 silver_core_customers          50000    
-bronze_deposit_accounts        85179    
-silver_deposit_accounts        81845    
-bronze_loans                   22868    
-silver_loans                   22077    
-bronze_card_accounts           22608    
-silver_card_accounts           21502    
+bronze_deposit_accounts        101261   
+silver_deposit_accounts        97294    
+bronze_loans                   34022    
+silver_loans                   32844    
+bronze_card_accounts           32612    
+silver_card_accounts           31022    
 bronze_card_transactions       800000   
 silver_card_transactions       800000   
-bronze_digital_events          1228258  
-silver_digital_events          1203693  
-silver_customer_identities     118669   
-customer_identity_map          118669   
-quarantine_records             27683    
-gold_product_holdings          125424   
-gold_digital_product_interest  44251    
-gold_customer_360              50186    
+bronze_digital_events          1221830  
+silver_digital_events          1197393  
+silver_customer_identities     134699   
+customer_identity_map          134699   
+quarantine_records             28547    
 
-## Exact duplicates removed (bronze rows minus distinct rows)
+## Exact duplicates removed vs planted (planted counts read from the generator manifest)
 source            duplicates_removed  planted
 ----------------  ------------------  -------
 core_customers    1000                1000   
-deposit_accounts  1670                1670   
-card_accounts     443                 443    
+deposit_accounts  1986                1986   
+card_accounts     639                 639    
+
+## Planted issue counts from the generator manifest (compare with quarantine counts below)
+planted_issue                   planted_rows
+------------------------------  ------------
+card_account_duplicate_rows     639         
+card_null_product_type          480         
+card_orphan_customer_id         480         
+core_customer_duplicate_rows    1000        
+deposit_account_duplicate_rows  1986        
+deposit_future_open_date        993         
+deposit_negative_balance        993         
+event_null_user_id              24437       
+loan_future_origination_date    340         
+loan_orphan_customer_id         510         
+loan_rate_out_of_range          340         
 
 ## Quarantined rows per rule (a row can break more than one rule)
 source_table      rule                          rows_failed
 ----------------  ----------------------------  -----------
-card_accounts     card_has_product_type         332        
-card_accounts     card_known_customer           332        
-deposit_accounts  deposit_balance_not_negative  835        
-deposit_accounts  deposit_open_date_not_future  835        
-digital_events    event_has_user_id             24565      
-loans             loan_known_customer           343        
-loans             loan_origination_not_future   229        
-loans             loan_rate_in_range            229        
+card_accounts     card_has_product_type         480        
+card_accounts     card_known_customer           479        
+deposit_accounts  deposit_balance_not_negative  993        
+deposit_accounts  deposit_open_date_not_future  993        
+digital_events    event_has_user_id             24437      
+loans             loan_known_customer           510        
+loans             loan_origination_not_future   340        
+loans             loan_rate_in_range            340        
 
 ## Identity matching: source records per system and match rule
 system        match_rule    records  ambiguous
 ------------  ------------  -------  ---------
-cards         email_dob     562      0        
-cards         name_dob_zip  60       0        
-cards         tax_id_token  19461    0        
-cards         unmatched     6        0        
+cards         email_dob     748      0        
+cards         name_dob_zip  79       0        
+cards         tax_id_token  28525    0        
+cards         unmatched     9        0        
 core_banking  anchor        50000    0        
-digital       email_dob     27942    0        
-digital       name_dob_zip  2256     0        
-digital       unmatched     174      0        
-loans         email_dob     665      0        
-loans         name_dob_zip  67       0        
-loans         tax_id_token  17470    0        
-loans         unmatched     6        0        
+digital       email_dob     28052    0        
+digital       name_dob_zip  2222     0        
+digital       unmatched     176      0        
+loans         email_dob     896      0        
+loans         name_dob_zip  109      0        
+loans         tax_id_token  23873    0        
+loans         unmatched     10       0        
 
 ## Matching accuracy against generator ground truth (non-core systems)
 system   records  matched  matched_correctly  precision  recall
 -------  -------  -------  -----------------  ---------  ------
-cards    20089    20083    20083              1.0        0.9997
-digital  30372    30198    30198              1.0        0.9943
-loans    18208    18202    18202              1.0        0.9997
+cards    29361    29352    29352              1.0        0.9997
+digital  30450    30274    30274              1.0        0.9942
+loans    24888    24878    24878              1.0        0.9996
 
 ## Customer 360 summary
 customers  unmatched_records  avg_active_products  customers_in_3plus_systems  deposits_musd  loans_musd
 ---------  -----------------  -------------------  --------------------------  -------------  ----------
-50186      186                2.38                 21520                       1085.9         1123.4    
+50195      195                3.07                 29231                       1452.9         1720.4    
 
 ## Sample customer 360 rows (synthetic)
 customer_360_id  segment        age  tenure_years  source_systems                              active_products  has_checking  has_savings  has_mortgage  has_credit_card  total_deposit_balance  card_spend_12m  digital_events_90d
 ---------------  -------------  ---  ------------  ------------------------------------------  ---------------  ------------  -----------  ------------  ---------------  ---------------------  --------------  ------------------
-C10027626        mass_affluent  31   10.2          ["cards","core_banking","digital","loans"]  3                1             0            1             1                2248.54                1506.05         7                 
-C10035869        affluent       41   3.6           ["cards","core_banking","digital","loans"]  4                0             1            1             1                26411.92               6573.03         7                 
-C10039385        mass           73   12.8          ["cards","core_banking","digital","loans"]  3                1             0            1             1                4298.16                920.94          8                 
-C10054139        mass           34   0.1           ["cards","core_banking","digital","loans"]  3                1             0            0             1                1640.31                778.58          11                
-C10063909        mass           19   0.4           ["cards","core_banking","digital","loans"]  4                1             1            0             1                52599.58               1291.91         28                
+C10001523        mass           53   6.8           ["cards","core_banking","digital","loans"]  5                1             1            1             1                13120.37               260.81          14                
+C10020956        mass           65   15.0          ["cards","core_banking","digital","loans"]  4                1             1            0             1                15172.98               704.66          2                 
+C10028771        mass_affluent  57   4.5           ["cards","core_banking","digital","loans"]  3                0             1            0             1                12567.78               400.90          2                 
+C10030247        mass_affluent  70   19.4          ["cards","core_banking","digital","loans"]  4                0             1            1             1                29765.37               3034.91         10                
+C10046926        mass           42   14.2          ["cards","core_banking","digital","loans"]  3                0             1            0             1                7374.02                521.97          2                 
 
 ## Expectation results from the pipeline event log (latest update)
 flow                                                          expectation                   passed   failed
 ------------------------------------------------------------  ----------------------------  -------  ------
-c360_bank.customer_lifetime_value.customer_identity_map       one_360_id_per_source         118669   0     
-c360_bank.customer_lifetime_value.gold_customer_360           unique_customer               50186    0     
-c360_bank.customer_lifetime_value.quarantine_records          card_has_customer_id          22165    0     
-c360_bank.customer_lifetime_value.quarantine_records          card_has_product_type         21833    332   
-c360_bank.customer_lifetime_value.quarantine_records          card_known_customer           21833    332   
-c360_bank.customer_lifetime_value.quarantine_records          deposit_balance_not_negative  82674    835   
-c360_bank.customer_lifetime_value.quarantine_records          deposit_has_customer_id       83509    0     
-c360_bank.customer_lifetime_value.quarantine_records          deposit_known_customer        83509    0     
-c360_bank.customer_lifetime_value.quarantine_records          deposit_open_date_not_future  82674    835   
-c360_bank.customer_lifetime_value.quarantine_records          event_has_user_id             1203693  24565 
-c360_bank.customer_lifetime_value.quarantine_records          event_known_user              1228258  0     
-c360_bank.customer_lifetime_value.quarantine_records          loan_has_customer_id          22868    0     
-c360_bank.customer_lifetime_value.quarantine_records          loan_known_customer           22525    343   
-c360_bank.customer_lifetime_value.quarantine_records          loan_origination_not_future   22639    229   
-c360_bank.customer_lifetime_value.quarantine_records          loan_rate_in_range            22639    229   
-c360_bank.customer_lifetime_value.silver_card_accounts        card_has_customer_id          22165    0     
-c360_bank.customer_lifetime_value.silver_card_accounts        card_has_product_type         21833    332   
-c360_bank.customer_lifetime_value.silver_card_accounts        card_known_customer           21833    332   
+c360_bank.customer_lifetime_value.customer_identity_map       one_360_id_per_source         134699   0     
+c360_bank.customer_lifetime_value.gold_customer_360           unique_customer               50195    0     
+c360_bank.customer_lifetime_value.quarantine_records          card_has_customer_id          31973    0     
+c360_bank.customer_lifetime_value.quarantine_records          card_has_product_type         31493    480   
+c360_bank.customer_lifetime_value.quarantine_records          card_known_customer           31494    479   
+c360_bank.customer_lifetime_value.quarantine_records          deposit_balance_not_negative  98282    993   
+c360_bank.customer_lifetime_value.quarantine_records          deposit_has_customer_id       99275    0     
+c360_bank.customer_lifetime_value.quarantine_records          deposit_known_customer        99275    0     
+c360_bank.customer_lifetime_value.quarantine_records          deposit_open_date_not_future  98282    993   
+c360_bank.customer_lifetime_value.quarantine_records          event_has_user_id             1197393  24437 
+c360_bank.customer_lifetime_value.quarantine_records          event_known_user              1221830  0     
+c360_bank.customer_lifetime_value.quarantine_records          loan_has_customer_id          34022    0     
+c360_bank.customer_lifetime_value.quarantine_records          loan_known_customer           33512    510   
+c360_bank.customer_lifetime_value.quarantine_records          loan_origination_not_future   33682    340   
+c360_bank.customer_lifetime_value.quarantine_records          loan_rate_in_range            33682    340   
+c360_bank.customer_lifetime_value.silver_card_accounts        card_has_customer_id          31973    0     
+c360_bank.customer_lifetime_value.silver_card_accounts        card_has_product_type         31493    480   
+c360_bank.customer_lifetime_value.silver_card_accounts        card_known_customer           31494    479   
 c360_bank.customer_lifetime_value.silver_card_transactions    txn_has_card_id               800000   0     
-c360_bank.customer_lifetime_value.silver_customer_identities  has_date_of_birth             118669   0     
-c360_bank.customer_lifetime_value.silver_customer_identities  has_source_customer_id        118669   0     
-c360_bank.customer_lifetime_value.silver_deposit_accounts     deposit_balance_not_negative  82674    835   
-c360_bank.customer_lifetime_value.silver_deposit_accounts     deposit_has_customer_id       83509    0     
-c360_bank.customer_lifetime_value.silver_deposit_accounts     deposit_known_customer        83509    0     
-c360_bank.customer_lifetime_value.silver_deposit_accounts     deposit_open_date_not_future  82674    835   
-c360_bank.customer_lifetime_value.silver_digital_events       event_has_user_id             1203693  24565 
-c360_bank.customer_lifetime_value.silver_digital_events       event_known_user              1228258  0     
-c360_bank.customer_lifetime_value.silver_loans                loan_has_customer_id          22868    0     
-c360_bank.customer_lifetime_value.silver_loans                loan_known_customer           22525    343   
-c360_bank.customer_lifetime_value.silver_loans                loan_origination_not_future   22639    229   
-c360_bank.customer_lifetime_value.silver_loans                loan_rate_in_range            22639    229   
+c360_bank.customer_lifetime_value.silver_customer_identities  has_date_of_birth             134699   0     
+c360_bank.customer_lifetime_value.silver_customer_identities  has_source_customer_id        134699   0     
+c360_bank.customer_lifetime_value.silver_deposit_accounts     deposit_balance_not_negative  98282    993   
+c360_bank.customer_lifetime_value.silver_deposit_accounts     deposit_has_customer_id       99275    0     
+c360_bank.customer_lifetime_value.silver_deposit_accounts     deposit_known_customer        99275    0     
+c360_bank.customer_lifetime_value.silver_deposit_accounts     deposit_open_date_not_future  98282    993   
+c360_bank.customer_lifetime_value.silver_digital_events       event_has_user_id             1197393  24437 
+c360_bank.customer_lifetime_value.silver_digital_events       event_known_user              1221830  0     
+c360_bank.customer_lifetime_value.silver_loans                loan_has_customer_id          34022    0     
+c360_bank.customer_lifetime_value.silver_loans                loan_known_customer           33512    510   
+c360_bank.customer_lifetime_value.silver_loans                loan_origination_not_future   33682    340   
+c360_bank.customer_lifetime_value.silver_loans                loan_rate_in_range            33682    340   
 
 
-Note: expectations defined on the *_checked views are reported under each flow that reads the view (silver_* and quarantine_records), so each rule appears twice with the same counts.
+Note: expectations on the *_checked views are reported under each flow that reads the view (silver_* and quarantine_records), so each rule appears twice with the same counts.

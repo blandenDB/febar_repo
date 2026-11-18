@@ -1,0 +1,222 @@
+# Evidence 04: cross-sell propensity model, CLV and recommendations
+# Captured 2026-11-18T20:30:52Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+
+Job 'c360_ml' run 694595022248792: SUCCESS, started 2026-11-18T20:15:49Z, 10.6 min. Tasks: explanations=SUCCESS, clv_assumptions=SUCCESS, train_and_score=SUCCESS
+
+## Task stdout: JSON summary (train_and_score)
+{
+  "step": "train_and_score",
+  "status": "ok",
+  "snapshot_date": "2026-09-01,2026-07-03,2026-05-04,2026-03-05",
+  "as_of": "2026-10-31",
+  "model": "c360_bank.customer_lifetime_value.cross_sell_propensity",
+  "model_version": "6",
+  "mlflow_run_id": "12bb0d0057814871a43bcbd9eb03c22c",
+  "metrics": {
+    "auc_overall": 0.9462,
+    "lift_top_decile_overall": 8.2404,
+    "train_rows": 834984,
+    "test_rows": 277429,
+    "train_positives": 3019,
+    "test_positives": 1091
+  },
+  "per_product": {
+    "savings": {
+      "test_rows": 14119,
+      "positives": 349,
+      "base_rate": 0.02472,
+      "auc": 0.8723,
+      "lift_top_decile": 6.25
+    },
+    "cd": {
+      "test_rows": 40252,
+      "positives": 74,
+      "base_rate": 0.00184,
+      "auc": 0.9317,
+      "lift_top_decile": 7.84
+    },
+    "money_market": {
+      "test_rows": 41524,
+      "positives": 76,
+      "base_rate": 0.00183,
+      "auc": 0.9273,
+      "lift_top_decile": 7.63
+    },
+    "mortgage": {
+      "test_rows": 37795,
+      "positives": 88,
+      "base_rate": 0.00233,
+      "auc": 0.9287,
+      "lift_top_decile": 7.27
+    },
+    "auto_loan": {
+      "test_rows": 34327,
+      "positives": 137,
+      "base_rate": 0.00399,
+      "auc": 0.915,
+      "lift_top_decile": 7.52
+    },
+    "heloc": {
+      "test_rows": 45082,
+      "positives": 22,
+      "base_rate": 0.00049,
+      "auc": 0.8665,
+      "lift_top_decile": 7.27
+    },
+    "personal_loan": {
+      "test_rows": 43417,
+      "positives": 50,
+      "base_rate": 0.00115,
+      "auc": 0.9316,
+      "lift_top_decile": 8.0
+    },
+    "credit_card": {
+      "test_rows": 20913,
+      "positives": 295,
+      "base_rate": 0.01411,
+      "auc": 0.9052,
+      "lift_top_decile": 6.75
+    }
+  },
+  "top_features": [
+    "tenure_years",
+    "product_code",
+    "views_product_90d",
+    "is_digital",
+    "segment_code",
+    "age"
+  ],
+  "customers_scored": 50191,
+  "customers_with_recommendation": 5605,
+  "base_rate_by_product": {
+    "auto_loan": 0.00338,
+    "cd": 0.00189,
+    "credit_card": 0.01181,
+    "heloc": 0.00058,
+    "money_market": 0.00154,
+    "mortgage": 0.00206,
+    "personal_loan": 0.00119,
+    "savings": 0.02419
+  },
+  "recommendation_rows": 8092,
+  "top1_product_mix": {
+    "mortgage": 1165,
+    "heloc": 1078,
+    "credit_card": 718,
+    "money_market": 708,
+    "auto_loan": 612,
+    "personal_loan": 514,
+    "cd": 427,
+    "savings": 383
+  },
+  "total_clv_musd": 276.1,
+  "total_expected_clv_uplift_top1_musd": 0.48
+}
+
+## Unity Catalog model c360_bank.customer_lifetime_value.cross_sell_propensity
+version 6  status READY  run 12bb0d0057814871a43bcbd9eb03c22c
+version 5  status READY  run 317fcb7ac6f941678c92d504df777b8c
+version 4  status READY  run 3fdbcb16c2d24f92b905753786233380
+version 3  status READY  run c9a5dbd3ef7646459bb609d2641d6487
+version 2  status READY  run 23d8c667c16f471ca8621db52faab5bf
+version 1  status READY  run f3532928cece4e119e03c28933805727
+aliases: {'champion': 6}
+
+## MLflow run 12bb0d0057814871a43bcbd9eb03c22c metrics
+{
+  "auc_auto_loan": 0.915,
+  "auc_cd": 0.9317,
+  "auc_credit_card": 0.9052,
+  "auc_heloc": 0.8665,
+  "auc_money_market": 0.9273,
+  "auc_mortgage": 0.9287,
+  "auc_overall": 0.9462,
+  "auc_personal_loan": 0.9316,
+  "auc_savings": 0.8723,
+  "lift_top_decile_auto_loan": 7.52,
+  "lift_top_decile_cd": 7.84,
+  "lift_top_decile_credit_card": 6.75,
+  "lift_top_decile_heloc": 7.27,
+  "lift_top_decile_money_market": 7.63,
+  "lift_top_decile_mortgage": 7.27,
+  "lift_top_decile_overall": 8.2404,
+  "lift_top_decile_personal_loan": 8.0,
+  "lift_top_decile_savings": 6.25,
+  "test_positives": 1091.0,
+  "test_rows": 277429.0,
+  "train_positives": 3019.0,
+  "train_rows": 834984.0
+}
+
+## SQL checks
+## CLV assumptions used (illustrative, see DECISIONS.md)
+product        margin_pct_of_balance  margin_pct_of_spend  annual_fee_income
+-------------  ---------------------  -------------------  -----------------
+auto_loan      0.0200                 0.0000               0.00             
+cd             0.0100                 0.0000               0.00             
+checking       0.0200                 0.0000               60.00            
+credit_card    0.1000                 0.0150               0.00             
+heloc          0.0250                 0.0000               0.00             
+money_market   0.0125                 0.0000               0.00             
+mortgage       0.0100                 0.0000               0.00             
+personal_loan  0.0400                 0.0000               0.00             
+savings        0.0150                 0.0000               0.00             
+
+## SELECT parameter, value FROM c360_bank.customer_lifetime_value.clv_parameters ORDER BY parameter
+parameter             value  
+--------------------  -------
+discount_rate         0.0800 
+horizon_years         10.0000
+retention_1_product   0.8500 
+retention_2_products  0.9000 
+retention_3_plus      0.9400 
+
+## CLV by segment and number of products
+segment        products_capped_at_4  customers  avg_annual_margin  retention  avg_clv
+-------------  --------------------  ---------  -----------------  ---------  -------
+affluent       0                     30         0.0                0.85       0.0    
+affluent       1                     270        311.0              0.85       1231.0 
+affluent       2                     550        1003.0             0.9        4672.0 
+affluent       3                     959        1657.0             0.94       8883.0 
+affluent       4                     3050       3151.0             0.94       16894.0
+mass           0                     506        0.0                0.85       0.0    
+mass           1                     4223       152.0              0.85       600.0  
+mass           2                     8174       374.0              0.9        1741.0 
+mass           3                     9202       665.0              0.94       3564.0 
+mass           4                     7975       1316.0             0.94       7055.0 
+mass_affluent  0                     137        0.0                0.85       0.0    
+mass_affluent  1                     1158       211.0              0.85       832.0  
+mass_affluent  2                     2498       563.0              0.9        2625.0 
+mass_affluent  3                     4094       1024.0             0.94       5488.0 
+mass_affluent  4                     7174       2011.0             0.94       10779.0
+unknown        0                     176        0.0                0.85       0.0    
+unknown        1                     17         299.0              0.85       1181.0 
+unknown        2                     2          789.0              0.9        3677.0 
+
+## Recommendations: customers covered and #1 product mix
+product        customers_with_this_as_top1  avg_propensity  avg_lift_vs_base  avg_clv_uplift_if_adopted  total_expected_clv_uplift
+-------------  ---------------------------  --------------  ----------------  -------------------------  -------------------------
+mortgage       1165                         0.0197          9.6               5676.0                     130383.0                 
+heloc          1078                         0.0091          15.6              2919.0                     29231.0                  
+credit_card    718                          0.1037          8.8               1746.0                     119552.0                 
+money_market   708                          0.0275          17.8              2808.0                     56055.0                  
+auto_loan      612                          0.0451          13.4              1501.0                     41947.0                  
+personal_loan  514                          0.0255          21.5              1229.0                     17407.0                  
+cd             427                          0.0362          19.1              1703.0                     27379.0                  
+savings        383                          0.2094          8.7               694.0                      55815.0                  
+
+## Sample recommendations with supporting signals (synthetic customers)
+customer_360_id  rnk  product       propensity  lift   clv_now  clv_with  signals                                                                                                                                                                                                                                                                                         
+---------------  ---  ------------  ----------  -----  -------  --------  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+C58495690        1    credit_card   0.9014      76.3   1705.0   5544.0    Viewed the credit card page 2 times online in the last 90 days | Started an online application for a credit card in the last 90 days | Currently holds: checking account, certificate of deposit | Banks with us for checking but has no card with us | Customer for 0.2 years, affluent segment
+C58495690        2    savings       0.0996      4.1    1705.0   2991.0    Viewed the savings account page 1 time online in the last 90 days | Currently holds: checking account, certificate of deposit | Customer for 0.2 years, affluent segment                                                                                                                        
+C58495690        3    heloc         0.0023      3.9    1705.0   5016.0    Viewed the home equity line of credit page 1 time online in the last 90 days | Currently holds: checking account, certificate of deposit | Customer for 0.2 years, affluent segment                                                                                                             
+C63503050        1    mortgage      0.6399      311.3  2779.0   9018.0    Viewed the mortgage page 2 times online in the last 90 days | Currently holds: checking account, credit card | Customer for 1.6 years, affluent segment                                                                                                                                         
+C72144116        1    money_market  0.9573      621.4  12416.0  16813.0   Viewed the money market account page 3 times online in the last 90 days | Started an online application for a money market account in the last 90 days | Currently holds: checking account, savings account, personal loan, credit card | Customer for 5.0 years, affluent segment              
+
+## Row filter attached to the new tables
+table_name                       filter_name                                         
+-------------------------------  ----------------------------------------------------
+gold_cross_sell_recommendations  c360_bank.customer_lifetime_value.c360_branch_filter
+gold_customer_clv                c360_bank.customer_lifetime_value.c360_branch_filter
+

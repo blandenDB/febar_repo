@@ -1,16 +1,9 @@
 # Evidence 01: synthetic raw data generation
-# Captured 2026-11-18T18:04:31Z. Job c360_generate_raw_data, run 273720574327769. User identities redacted.
+# Captured 2026-11-18T20:29:47Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-$ databricks jobs get-run 273720574327769 --profile febar  (state)
-{
-  "run_id": 273720574327769,
-  "job_id": 83390472250474,
-  "life_cycle_state": "TERMINATED",
-  "result_state": "SUCCESS",
-  "run_duration_ms": 238779
-}
+Job 'c360_generate_raw_data' run 283891549066850: SUCCESS, started 2026-11-18T19:15:48Z, 0.6 min. Tasks: generate=SUCCESS
 
-# Task stdout (last line, JSON summary)
+## Task stdout: JSON summary
 {
   "step": "generate_raw_data",
   "status": "ok",
@@ -18,46 +11,51 @@ $ databricks jobs get-run 273720574327769 --profile febar  (state)
   "people": 50000,
   "raw_rows": {
     "core_banking/customers": 51000,
-    "core_banking/deposit_accounts": 85179,
-    "loans/customers": 18208,
-    "loans/loans": 22868,
-    "cards/customers": 20089,
-    "cards/card_accounts": 22608,
+    "core_banking/deposit_accounts": 101261,
+    "loans/customers": 24888,
+    "loans/loans": 34022,
+    "cards/customers": 29361,
+    "cards/card_accounts": 32612,
     "cards/card_transactions": 800000,
-    "digital/users": 30372,
-    "digital/events": 1228258
+    "digital/users": 30450,
+    "digital/events": 1221830
   },
-  "total_raw_rows": 2278582,
+  "total_raw_rows": 2325424,
   "planted_issues": {
-    "deposit_negative_balance": 835,
-    "deposit_future_open_date": 835,
-    "loan_future_origination_date": 229,
-    "loan_rate_out_of_range": 229,
-    "loan_orphan_customer_id": 343,
-    "card_orphan_customer_id": 332,
-    "event_null_user_id": 24565,
-    "card_null_product_type": 332,
+    "deposit_negative_balance": 993,
+    "deposit_future_open_date": 993,
+    "loan_future_origination_date": 340,
+    "loan_rate_out_of_range": 340,
+    "loan_orphan_customer_id": 510,
+    "card_orphan_customer_id": 480,
+    "event_null_user_id": 24437,
+    "card_null_product_type": 480,
     "core_customer_duplicate_rows": 1000,
-    "deposit_account_duplicate_rows": 1670,
-    "card_account_duplicate_rows": 443
+    "deposit_account_duplicate_rows": 1986,
+    "card_account_duplicate_rows": 639
   },
-  "identity_rows": 118669
+  "identity_rows": 134699
 }
 
-$ databricks fs ls -l <raw volume folders>
-raw/core_banking/customers/  7709582 bytes
-raw/core_banking/deposit_accounts/  4742363 bytes
-raw/loans/customers/  2231806 bytes
-raw/loans/loans/  1798918 bytes
-raw/cards/customers/  5421459 bytes
-raw/cards/card_accounts/  3909373 bytes
-raw/cards/card_transactions/  103260112 bytes
-raw/digital/users/  8240392 bytes
-raw/digital/events/  180742129 bytes
+## SQL checks
+## Raw row counts read back from the volume with read_files()
+source                         row_count
+-----------------------------  ---------
+core_banking/customers         51000    
+core_banking/deposit_accounts  101261   
+loans/customers                24888    
+loans/loans                    34022    
+cards/customers                29361    
+cards/card_accounts            32612    
+cards/card_transactions        800000   
+digital/users                  30450    
+digital/events                 1221830  
 
-$ SQL on serverless warehouse: row counts via read_files()
-state: SUCCEEDED
-   core_banking/customers 51000
-   loans/loans 22868
-   cards/card_accounts 22608
-   digital/events 1228258
+## Sample raw identity rows for one synthetic person across systems (shows planted identity drift)
+system        source_customer_id  first_name  last_name  date_of_birth  email                         phone            zip  
+------------  ------------------  ----------  ---------  -------------  ----------------------------  ---------------  -----
+cards         CC30921324          Anthony     Nelson     1959-05-06     anthony.nelson10@example.com  5558539574       75054
+core_banking  CB67840276          Anthony     Nelson     1959-05-06     anthony.nelson10@example.com  (555) 853-9574   75054
+digital       DG99233918          Anthony     Nelson     1959-05-06     anthony.nelson10@example.com  +1 555.853.9574  75054
+loans         LN14433076          ANTHONY     NELSON     1959-05-06     anthony.nelson10@example.com  555-853-9574     75054
+

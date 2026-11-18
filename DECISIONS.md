@@ -63,3 +63,42 @@
 - **Options considered:** entitlement table; ask an account admin for account-level groups; dynamic views only.
 - **Context:** FEVM workspace admins can only create workspace-local groups, which Unity Catalog rejects (`PRINCIPAL_DOES_NOT_EXIST`).
 - **Why:** [YOUR WORDS]
+
+## 2026-11-18: AI approach
+
+- **Decision:** per-product propensity models (trained on customers who opened the product in the last 120 days; MLflow tracked, registered in UC) plus a foundation model that writes a short, fact-grounded banker explanation for the top recommendation.
+- **Options considered:** (A) propensity models only; (B) propensity models plus GenAI explanation; (C) GenAI only.
+- **Why:** [YOUR WORDS]
+
+## 2026-11-18: CLV method
+
+- **Decision:** CLV = sum over held products of annual margin x expected remaining years, discounted. Cross-sell value = added product margin x expected lifetime x propensity.
+- **Options considered:** (A) margin x expected lifetime; (B) current annual revenue only; (C) ML-predicted CLV.
+- **Why:** [YOUR WORDS]
+- **Assumptions [YOUR WORDS]:** accepted as an illustrative starting point (not sourced benchmarks; replace with your own). Annual margin: checking 2.0% of balance + $60/yr fees; savings 1.5%; CD 1.0%; money market 1.25%; mortgage 1.0%; auto loan 2.0%; HELOC 2.5%; personal loan 4.0%; credit card 1.5% of annual spend + 10% of balance. Annual retention: 85% (1 product), 90% (2), 94% (3 or more). Horizon 10 years, discount rate 8%. New-product balance = median of current holders in the same segment. Stored in config tables `clv_product_assumptions` and `clv_parameters`.
+
+## 2026-11-18: Explanation model
+
+- **Decision:** `databricks-claude-haiku-5-5` writes the banker-facing explanation.
+- **Options considered:** Claude Haiku 5.5; Claude Sonnet 5.5; GPT-5.4 mini.
+- **Why:** [YOUR WORDS]
+
+## 2026-11-18: Recommendation ranking
+
+- **Decision:** rank each customer's eligible products by expected CLV uplift (propensity x CLV uplift if adopted), where eligible means propensity is at least 3x that product's base rate. Customers with no eligible product get "no strong recommendation".
+- **Options considered:** uplift with a propensity floor; propensity only; pure expected value (made mortgage the #1 product for 25,144 customers at a median propensity of 0.09%).
+- **Why:** [YOUR WORDS]
+
+## 2026-11-18: Generator realism fix
+
+- **Decision:** products are opened at onboarding (60%) or acquired later at a constant rate (mean wait about 6 years), instead of spread evenly over tenure.
+- **Options considered:** fix the generator; keep it and explain the onboarding effect.
+- **Context:** before the fix, 53% of customers under 6 months' tenure opened a product in any 60-day window (2% for 5-year customers), so tenure drove a 0.94 AUC.
+- **Why:** [YOUR WORDS]
+
+## 2026-11-18: Synthetic cross-sell rate
+
+- **Decision:** raise the synthetic bank's cross-sell rate so about 10% of customers open a new product per year (it was about 4%).
+- **Options considered:** raise to about 10% a year; keep the data and report small per-product counts with caveats.
+- **Context:** model v2 had only 1,453 positives; some products had 9 to 25 test positives.
+- **Why:** [YOUR WORDS]

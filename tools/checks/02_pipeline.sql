@@ -18,13 +18,26 @@ UNION ALL SELECT 'gold_product_holdings', COUNT(*) FROM c360_bank.customer_lifet
 UNION ALL SELECT 'gold_digital_product_interest', COUNT(*) FROM c360_bank.customer_lifetime_value.gold_digital_product_interest
 UNION ALL SELECT 'gold_customer_360', COUNT(*) FROM c360_bank.customer_lifetime_value.gold_customer_360
 ;
--- title: Exact duplicates removed (bronze rows minus distinct rows)
+-- title: Exact duplicates removed vs planted (planted counts read from the generator manifest)
+WITH m AS (
+  SELECT planted_issues FROM read_files('/Volumes/c360_bank/customer_lifetime_value/ground_truth/manifest',
+    format => 'json', multiLine => true, schemaHints => 'planted_issues MAP<STRING, BIGINT>')
+)
 SELECT 'core_customers' AS source, (SELECT COUNT(*) FROM c360_bank.customer_lifetime_value.bronze_core_customers)
-       - (SELECT COUNT(*) FROM c360_bank.customer_lifetime_value.silver_core_customers) AS duplicates_removed, 1000 AS planted
+       - (SELECT COUNT(*) FROM c360_bank.customer_lifetime_value.silver_core_customers) AS duplicates_removed,
+       (SELECT planted_issues['core_customer_duplicate_rows'] FROM m) AS planted
 UNION ALL SELECT 'deposit_accounts', (SELECT COUNT(*) FROM c360_bank.customer_lifetime_value.bronze_deposit_accounts)
-       - (SELECT COUNT(DISTINCT account_id) FROM c360_bank.customer_lifetime_value.bronze_deposit_accounts), 1670
+       - (SELECT COUNT(DISTINCT account_id) FROM c360_bank.customer_lifetime_value.bronze_deposit_accounts),
+       (SELECT planted_issues['deposit_account_duplicate_rows'] FROM m)
 UNION ALL SELECT 'card_accounts', (SELECT COUNT(*) FROM c360_bank.customer_lifetime_value.bronze_card_accounts)
-       - (SELECT COUNT(DISTINCT card_id) FROM c360_bank.customer_lifetime_value.bronze_card_accounts), 443
+       - (SELECT COUNT(DISTINCT card_id) FROM c360_bank.customer_lifetime_value.bronze_card_accounts),
+       (SELECT planted_issues['card_account_duplicate_rows'] FROM m)
+;
+-- title: Planted issue counts from the generator manifest (compare with quarantine counts below)
+SELECT k AS planted_issue, v AS planted_rows
+FROM (SELECT EXPLODE(planted_issues) AS (k, v) FROM read_files('/Volumes/c360_bank/customer_lifetime_value/ground_truth/manifest',
+    format => 'json', multiLine => true, schemaHints => 'planted_issues MAP<STRING, BIGINT>'))
+ORDER BY k
 ;
 -- title: Quarantined rows per rule (a row can break more than one rule)
 SELECT source_table, rule, COUNT(*) AS rows_failed

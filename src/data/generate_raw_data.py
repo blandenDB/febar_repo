@@ -75,6 +75,10 @@ ALL_PRODUCTS = ["checking", "savings", "cd", "money_market", "mortgage", "auto_l
                 "heloc", "personal_loan", "credit_card"]
 
 SECONDS_PER_DAY = 86400
+# Scales the lifetime chance of holding each non-checking product. Products are opened
+# at onboarding or acquired later (see open_dates), so this sets the yearly cross-sell
+# rate. Tuned so about 10% of customers open a new product per year.
+CROSS_SELL_BOOST = 1.8
 
 
 # ---------------------------------------------------------------- helpers
@@ -122,6 +126,24 @@ def pick(rng, n, rate):
     """Indices of a random `rate` share of n rows (at least 1 when n > 0)."""
     k = max(1, int(round(n * rate))) if n else 0
     return rng.choice(n, size=k, replace=False)
+
+
+def open_dates(rng, since, p_onboard=0.2, scale_years=4.0):
+    """Open date for each account a customer would hold, plus a keep mask.
+
+    p_onboard of accounts open within 30 days of joining. The rest are acquired later
+    at a constant rate (exponential wait, mean scale_years); accounts whose acquisition
+    date would fall after AS_OF are not held yet (keep=False). A constant rate means a
+    new customer is no more likely to open a product in a given window than a long-
+    standing one, apart from onboarding itself.
+    """
+    since = pd.to_datetime(pd.Series(since)).to_numpy()
+    n = len(since)
+    onboard = rng.random(n) < p_onboard
+    wait_days = np.where(onboard, rng.random(n) * 30, rng.exponential(scale_years * 365.25, n))
+    opened = since + (wait_days * SECONDS_PER_DAY).astype("int64").astype("timedelta64[s]")
+    keep = opened <= AS_OF.to_datetime64()
+    return opened, keep
 
 
 # ---------------------------------------------------------------- people
@@ -202,11 +224,18 @@ def deposit_accounts(rng, people):
     }
     parts = []
     for prod, (p0, boost, mu, sd) in specs.items():
-        has = rng.random(n) < np.minimum(p0 + boost * mult, 0.97)
+        p_hold = p0 + boost * mult
+        if prod != "checking":
+            p_hold = p_hold * CROSS_SELL_BOOST
+        has = rng.random(n) < np.minimum(p_hold, 0.97)
         idx = np.flatnonzero(has)
+        if prod == "checking":  # the anchor account is opened when the customer joins
+            opened = people["customer_since"].to_numpy()[idx]
+            keep = np.ones(len(idx), dtype=bool)
+        else:
+            opened, keep = open_dates(rng, people["customer_since"].to_numpy()[idx])
+        idx, opened = idx[keep], opened[keep]
         bal = np.round(rng.lognormal(mu, sd, len(idx)) * np.sqrt(mult[idx]), 2)
-        opened = rand_dates_between(rng, people["customer_since"].to_numpy()[idx],
-                                    np.repeat(AS_OF.to_datetime64(), len(idx)))
         parts.append(pd.DataFrame({"person_id": people["person_id"].to_numpy()[idx],
                                    "product_type": prod, "open_date": opened,
                                    "balance": bal}))
@@ -221,20 +250,20 @@ def loan_accounts(rng, people):
     seg = people["segment"].to_numpy()
     age = people["age"].to_numpy()
     seg_p = {"mass": 0.12, "mass_affluent": 0.28, "affluent": 0.38}
-    p_mort = np.vectorize(seg_p.get)(seg) * ((age > 25) & (age < 75))
+    p_mort = np.minimum(np.vectorize(seg_p.get)(seg) * CROSS_SELL_BOOST, 0.9) * ((age > 25) & (age < 75))
     has_mort = rng.random(n) < p_mort
     specs = [
         ("mortgage", has_mort, (3.0, 7.5), [180, 360], 12.2, 0.5),
-        ("auto_loan", rng.random(n) < 0.20, (4.0, 11.0), [36, 48, 60, 72], 10.1, 0.4),
+        ("auto_loan", rng.random(n) < min(0.20 * CROSS_SELL_BOOST, 0.9), (4.0, 11.0), [36, 48, 60, 72], 10.1, 0.4),
         ("heloc", has_mort & (rng.random(n) < 0.30), (6.0, 10.0), [120], 10.6, 0.6),
-        ("personal_loan", rng.random(n) < 0.07, (8.0, 18.0), [24, 36, 48, 60], 9.2, 0.5),
+        ("personal_loan", rng.random(n) < min(0.07 * CROSS_SELL_BOOST, 0.9), (8.0, 18.0), [24, 36, 48, 60], 9.2, 0.5),
     ]
     parts = []
     for prod, mask, (rlo, rhi), terms, mu, sd in specs:
         idx = np.flatnonzero(mask)
+        opened, keep = open_dates(rng, people["customer_since"].to_numpy()[idx])
+        idx, opened = idx[keep], opened[keep]
         orig = np.round(rng.lognormal(mu, sd, len(idx)), -2)
-        opened = rand_dates_between(rng, people["customer_since"].to_numpy()[idx],
-                                    np.repeat(AS_OF.to_datetime64(), len(idx)))
         parts.append(pd.DataFrame({
             "person_id": people["person_id"].to_numpy()[idx], "product_type": prod,
             "origination_date": opened, "original_amount": orig,
@@ -253,15 +282,15 @@ def card_accounts(rng, people):
     n = len(people)
     seg = people["segment"].to_numpy()
     seg_p = {"mass": 0.32, "mass_affluent": 0.50, "affluent": 0.60}
-    holder = rng.random(n) < np.vectorize(seg_p.get)(seg)
+    holder = rng.random(n) < np.minimum(np.vectorize(seg_p.get)(seg) * CROSS_SELL_BOOST, 0.95)
     idx = np.flatnonzero(holder)
     idx = np.concatenate([idx, idx[rng.random(len(idx)) < 0.10]])  # some hold two cards
+    opened, keep = open_dates(rng, people["customer_since"].to_numpy()[idx])
+    idx, opened = idx[keep], opened[keep]
     s = seg[idx]
     ptype = np.where(s == "mass", rng.choice(["cash_back", "secured"], len(idx), p=[0.8, 0.2]),
                      rng.choice(["cash_back", "travel_rewards"], len(idx), p=[0.5, 0.5]))
     limit = np.round(np.vectorize(SEG_MULT.get)(s) * rng.uniform(1500, 6000, len(idx)), -2)
-    opened = rand_dates_between(rng, people["customer_since"].to_numpy()[idx],
-                                np.repeat(AS_OF.to_datetime64(), len(idx)))
     cards = pd.DataFrame({
         "person_id": people["person_id"].to_numpy()[idx], "product_type": ptype.astype(object),
         "open_date": opened, "credit_limit": limit,
@@ -381,13 +410,13 @@ def main():
     lns["ln_customer_id"] = map_ids(lns, lcust)
     crd["cc_customer_id"] = map_ids(crd, ccust)
 
-    # ---- recent acquisitions (last 120 days) drive the digital browse signal
+    # ---- acquisitions in the last 365 days drive the digital browse signal
     recent = pd.concat([
         dep.rename(columns={"open_date": "open_ts", "product_type": "product"})[["person_id", "product", "open_ts"]],
         lns.rename(columns={"origination_date": "open_ts", "product_type": "product"})[["person_id", "product", "open_ts"]],
         crd.assign(product="credit_card").rename(columns={"open_date": "open_ts"})[["person_id", "product", "open_ts"]],
     ], ignore_index=True)
-    recent = recent[recent["open_ts"] >= AS_OF - pd.Timedelta(days=120)]
+    recent = recent[recent["open_ts"] >= AS_OF - pd.Timedelta(days=300)]
     recent = recent[recent["product"] != "checking"]
 
     txns = card_transactions(rng, crd, a.card_txns)
