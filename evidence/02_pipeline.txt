@@ -1,5 +1,5 @@
 # Evidence 02: Lakeflow pipeline (bronze, silver + quarantine, identity matching, gold)
-# Captured 2026-11-18T20:30:05Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-18T21:40:13Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
 ## Latest pipeline updates (newest first)
 77e8f429-6507-4296-8cfe-1e1567bb49a6  COMPLETED  incremental  2026-11-18T19:18:40Z

@@ -15,6 +15,10 @@ variables:
     description: Serverless SQL warehouse used for queries, Genie and the app
     default: 7252b2dd64dc2427
 
+  app_postgres_role:
+    description: Postgres role of the Databricks App service principal (its application ID); empty until the app exists
+    default: ""
+
 targets:
   febar:
     default: true

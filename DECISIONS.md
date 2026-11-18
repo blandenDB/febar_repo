@@ -102,3 +102,10 @@
 - **Options considered:** raise to about 10% a year; keep the data and report small per-product counts with caveats.
 - **Context:** model v2 had only 1,453 positives; some products had 9 to 25 test positives.
 - **Why:** [YOUR WORDS]
+
+## 2026-11-18: Lakebase operational serving
+
+- **Decision:** sync the banker-facing UC tables (customer 360, holdings, recommendations, explanations, entitlements) to Lakebase; the app writes banker actions to a `banker_feedback` table in Lakebase; Postgres row-level security limits each banker to their branches using the synced entitlements; feedback flows back to UC for Genie.
+- **Options considered:** (A) synced reads + feedback write-back + Postgres row-level security; (B) synced reads only with filtering in app code; (C) no Lakebase, app reads UC through the SQL warehouse.
+- **Context:** syncs run as the data owner, so UC row filters do not carry into Postgres; access must be enforced again there.
+- **Why:** [YOUR WORDS]

@@ -126,6 +126,30 @@ def main():
           + "\nReview note: explanations flagged by mentions_offer_or_rate were read by hand. They say the product "
             "fits 'without relying on any specific rate, fee, or promotion' (echoing the instruction), not an invented offer.\n")
 
+    # 06 Lakebase
+    lakebase(p, jobs)
+
+
+def lakebase(p, jobs):
+    run = latest_success(p, jobs["c360_serve"])
+    body = run_header(run) + "\n\n"
+    for task in ("refresh_synced_tables", "postgres_setup"):
+        body += f"## Task stdout: JSON summary ({task})\n" + json.dumps(task_summary(p, run, task), indent=2) + "\n\n"
+    synced = []
+    for t in ("pg_customer_360", "pg_product_holdings", "pg_recommendations", "pg_banker_assignments"):
+        d = cli(p, "postgres", "get-synced-table", f"synced_tables/c360_bank.customer_lifetime_value.{t}")
+        st = d.get("status", {})
+        synced.append(f"{t}  source=c360_bank.customer_lifetime_value.{t.replace('pg_', 'serving_')} (resources/lakebase.yml)  "
+                      f"state={st.get('detailed_state')}")
+    body += "## Synced tables (UC -> Lakebase, SNAPSHOT)\n" + "\n".join(synced) + "\n\n"
+    fb = latest_success(p, jobs["c360_feedback_sync"])
+    body += "## Feedback back to Unity Catalog\n" + run_header(fb) + "\n" + json.dumps(task_summary(p, fb, "feedback_to_uc"), indent=2) + "\n"
+    body += ("\nAccess model: UC does not allow syncing tables with row filters or column masks, so owner-only serving_* "
+             "copies are synced. In Postgres, the app role can read only security_barrier views in schema app that keep "
+             "the signed-in banker's branches, and banker_feedback has row-level security. The checks above run as a "
+             "temporary role with exactly the app's grants.\n")
+    write("06_lakebase.txt", "Evidence 06: Lakebase operational serving (synced tables, Postgres access control, feedback loop)", body)
+
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 # Evidence 01: synthetic raw data generation
-# Captured 2026-11-18T20:29:47Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-18T21:39:55Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
 Job 'c360_generate_raw_data' run 283891549066850: SUCCESS, started 2026-11-18T19:15:48Z, 0.6 min. Tasks: generate=SUCCESS
 
