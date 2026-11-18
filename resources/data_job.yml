@@ -1,0 +1,23 @@
+resources:
+  jobs:
+    generate_raw_data:
+      name: c360_generate_raw_data
+      description: Generates synthetic raw files for the four source systems (fixed seed, idempotent)
+      tasks:
+        - task_key: generate
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/data/generate_raw_data.py
+            parameters:
+              - --raw-root
+              - /Volumes/${var.catalog}/${var.schema}/${resources.volumes.raw.name}
+              - --truth-root
+              - /Volumes/${var.catalog}/${var.schema}/${resources.volumes.ground_truth.name}
+              - --customers
+              - "50000"
+              - --seed
+              - "42"
+      environments:
+        - environment_key: default
+          spec:
+            client: "2"

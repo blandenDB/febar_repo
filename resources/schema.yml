@@ -4,3 +4,15 @@ resources:
       catalog_name: ${var.catalog}
       name: ${var.schema}
       comment: FE Bar customer 360 and lifetime value build (synthetic data only)
+
+  volumes:
+    raw:
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.customer_lifetime_value.name}
+      name: raw
+      comment: Raw synthetic source files landed from the four bank source systems
+    ground_truth:
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.customer_lifetime_value.name}
+      name: ground_truth
+      comment: Generator ground truth for evaluating matching and quality rules; never read by the pipeline

@@ -1,0 +1,63 @@
+# Evidence 01: synthetic raw data generation
+# Captured 2026-11-18T18:04:31Z. Job c360_generate_raw_data, run 273720574327769. User identities redacted.
+
+$ databricks jobs get-run 273720574327769 --profile febar  (state)
+{
+  "run_id": 273720574327769,
+  "job_id": 83390472250474,
+  "life_cycle_state": "TERMINATED",
+  "result_state": "SUCCESS",
+  "run_duration_ms": 238779
+}
+
+# Task stdout (last line, JSON summary)
+{
+  "step": "generate_raw_data",
+  "status": "ok",
+  "seed": 42,
+  "people": 50000,
+  "raw_rows": {
+    "core_banking/customers": 51000,
+    "core_banking/deposit_accounts": 85179,
+    "loans/customers": 18208,
+    "loans/loans": 22868,
+    "cards/customers": 20089,
+    "cards/card_accounts": 22608,
+    "cards/card_transactions": 800000,
+    "digital/users": 30372,
+    "digital/events": 1228258
+  },
+  "total_raw_rows": 2278582,
+  "planted_issues": {
+    "deposit_negative_balance": 835,
+    "deposit_future_open_date": 835,
+    "loan_future_origination_date": 229,
+    "loan_rate_out_of_range": 229,
+    "loan_orphan_customer_id": 343,
+    "card_orphan_customer_id": 332,
+    "event_null_user_id": 24565,
+    "card_null_product_type": 332,
+    "core_customer_duplicate_rows": 1000,
+    "deposit_account_duplicate_rows": 1670,
+    "card_account_duplicate_rows": 443
+  },
+  "identity_rows": 118669
+}
+
+$ databricks fs ls -l <raw volume folders>
+raw/core_banking/customers/  7709582 bytes
+raw/core_banking/deposit_accounts/  4742363 bytes
+raw/loans/customers/  2231806 bytes
+raw/loans/loans/  1798918 bytes
+raw/cards/customers/  5421459 bytes
+raw/cards/card_accounts/  3909373 bytes
+raw/cards/card_transactions/  103260112 bytes
+raw/digital/users/  8240392 bytes
+raw/digital/events/  180742129 bytes
+
+$ SQL on serverless warehouse: row counts via read_files()
+state: SUCCEEDED
+   core_banking/customers 51000
+   loans/loans 22868
+   cards/card_accounts 22608
+   digital/events 1228258
