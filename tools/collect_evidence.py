@@ -129,6 +129,9 @@ def main():
     # 06 Lakebase
     lakebase(p, jobs)
 
+    # 07 Genie
+    genie(p)
+
 
 def lakebase(p, jobs):
     run = latest_success(p, jobs["c360_serve"])
@@ -149,6 +152,29 @@ def lakebase(p, jobs):
              "the signed-in banker's branches, and banker_feedback has row-level security. The checks above run as a "
              "temporary role with exactly the app's grants.\n")
     write("06_lakebase.txt", "Evidence 06: Lakebase operational serving (synced tables, Postgres access control, feedback loop)", body)
+
+
+def genie(p):
+    space = cli(p, "bundle", "summary")["resources"]["genie_spaces"]["c360_analyst"]["id"]
+    runs = cli(p, "genie", "genie-list-eval-runs", space)
+    runs = runs.get("eval_runs", runs if isinstance(runs, list) else [])
+    runs = sorted(runs, key=lambda r: r.get("created_timestamp", 0))
+    body = f"Genie space {space}: 5 tables, instructions, 8 sample questions, 3 example SQLs, 10 benchmark questions.\n\n"
+    body += "## Benchmark evaluation runs (oldest first)\n"
+    for r in runs:
+        t = dt.datetime.fromtimestamp(r["created_timestamp"] / 1000, dt.timezone.utc)
+        body += (f"{r['eval_run_id']}  {t:%Y-%m-%dT%H:%M:%SZ}  {r.get('eval_run_status')}  "
+                 f"correct {r.get('num_correct')}/{r.get('num_questions')}  needs_review {r.get('num_needs_review', 0)}\n")
+    body += ("Changes between runs (see BUILD_LOG.md): run 1 -> 2 added 'shares as fractions' and 'keep NULL segment'; "
+             "run 2 -> 3 added 'exact equality on segment codes' and 'round shares to 3 decimals'.\n\n")
+    last = runs[-1]["eval_run_id"]
+    body += f"## Latest run {last}: per question\n"
+    res = cli(p, "genie", "genie-list-eval-results", space, last).get("eval_results", [])
+    for x in res:
+        d = cli(p, "genie", "genie-get-eval-result-details", space, last, x["result_id"])
+        act = (d.get("actual_response") or [{}])[0].get("response", "").strip()
+        body += f"\nQ: {x.get('question')}\nassessment: {d.get('assessment')} {d.get('assessment_reasons') or ''}\nGenie SQL:\n{act}\n"
+    write("07_genie.txt", "Evidence 07: Genie analyst space and benchmark evaluations", body)
 
 
 if __name__ == "__main__":

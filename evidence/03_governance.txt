@@ -1,5 +1,5 @@
 # Evidence 03: Unity Catalog governance (entitlements, column masks, row filters, tags)
-# Captured 2026-11-18T21:40:47Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-18T23:58:24Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
 Job 'c360_build' run 877757199303544: SUCCESS, started 2026-11-18T19:18:28Z, 2.0 min. Tasks: pii_tags=SUCCESS, access_policies=SUCCESS, refresh_pipeline=SUCCESS
 Method: the same queries run while the caller's entitlement is switched between personas, then restored to data_owner.

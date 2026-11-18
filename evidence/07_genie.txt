@@ -1,0 +1,124 @@
+# Evidence 07: Genie analyst space and benchmark evaluations
+# Captured 2026-11-18T23:59:04Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+
+Genie space 01f1e3a11b1d1fd29b05b513c1bea937: 5 tables, instructions, 8 sample questions, 3 example SQLs, 10 benchmark questions.
+
+## Benchmark evaluation runs (oldest first)
+01f1e3a126031a6095ed8334bbec0b16  2026-11-18T22:41:09Z  DONE  correct 8/10  needs_review 0
+01f1e3a2215a1efbafc4e63cadc37bf3  2026-11-18T22:48:10Z  DONE  correct 8/10  needs_review 1
+01f1e3a2c1401cca855731db39289075  2026-11-18T22:52:39Z  DONE  correct 10/10  needs_review 0
+Changes between runs (see BUILD_LOG.md): run 1 -> 2 added 'shares as fractions' and 'keep NULL segment'; run 2 -> 3 added 'exact equality on segment codes' and 'round shares to 3 decimals'.
+
+## Latest run 01f1e3a2c1401cca855731db39289075: per question
+
+Q: How many customers have at least one recommendation?
+assessment: GOOD 
+Genie SQL:
+SELECT COUNT(DISTINCT `customer_360_id`) AS `customers_with_at_least_one_recommendation`
+FROM `c360_bank`.`customer_lifetime_value`.`gold_cross_sell_recommendations`
+
+Q: How many affluent customers have a mortgage but no home equity line of credit?
+assessment: GOOD 
+Genie SQL:
+SELECT COUNT(*) AS `affluent_customers_with_mortgage_no_heloc`
+FROM `c360_bank`.`customer_lifetime_value`.`gold_customer_360`
+WHERE `segment` = 'affluent'
+  AND `has_mortgage` = 1
+  AND `has_heloc` = 0;
+
+Q: What share of digitally enrolled customers hold 3 or more active products?
+assessment: GOOD 
+Genie SQL:
+SELECT ROUND(AVG(CASE WHEN `active_products` >= 3 THEN 1.0 ELSE 0.0 END), 3) AS `share_digitally_enrolled_with_3plus_active_products`
+FROM `c360_bank`.`customer_lifetime_value`.`gold_customer_360`
+WHERE `is_digitally_enrolled` = TRUE;
+
+Q: Which product is most often the next best product recommendation?
+assessment: GOOD 
+Genie SQL:
+WITH product_counts AS (
+  SELECT
+    `product`,
+    COUNT(*) AS `customers`
+  FROM `c360_bank`.`customer_lifetime_value`.`gold_cross_sell_recommendations`
+  WHERE `recommendation_rank` = 1
+    AND `product` IS NOT NULL
+  GROUP BY `product`
+), ranked_products AS (
+  SELECT
+    `product`,
+    `customers`,
+    RANK() OVER (ORDER BY `customers` DESC) AS `rnk`
+  FROM product_counts
+)
+SELECT
+  `product`,
+  `customers`
+FROM ranked_products
+WHERE `rnk` = 1
+
+Q: How many customers are there?
+assessment: GOOD 
+Genie SQL:
+SELECT COUNT(*) AS `customers`
+FROM `c360_bank`.`customer_lifetime_value`.`gold_customer_360`
+
+Q: Which 5 branches have the most total expected CLV uplift from next best product recommendations?
+assessment: GOOD 
+Genie SQL:
+WITH `branch_uplift` AS (
+  SELECT
+    `home_branch_id`,
+    ROUND(SUM(`expected_clv_uplift`), 0) AS `total_expected_clv_uplift_usd`
+  FROM `c360_bank`.`customer_lifetime_value`.`gold_cross_sell_recommendations`
+  WHERE `recommendation_rank` = 1
+    AND `home_branch_id` IS NOT NULL
+  GROUP BY `home_branch_id`
+),
+`ranked` AS (
+  SELECT
+    `home_branch_id`,
+    `total_expected_clv_uplift_usd`,
+    RANK() OVER (ORDER BY `total_expected_clv_uplift_usd` DESC) AS `uplift_rank`
+  FROM `branch_uplift`
+)
+SELECT
+  `home_branch_id`,
+  `total_expected_clv_uplift_usd`
+FROM `ranked`
+WHERE `uplift_rank` <= 5
+ORDER BY `total_expected_clv_uplift_usd` DESC, `home_branch_id`
+
+Q: How many customers have a checking account but no credit card?
+assessment: GOOD 
+Genie SQL:
+SELECT COUNT(*) AS `customers_with_checking_no_credit_card`
+FROM `c360_bank`.`customer_lifetime_value`.`gold_customer_360`
+WHERE `has_checking` = 1
+  AND `has_credit_card` = 0;
+
+Q: What is the average CLV of customers with 1 product compared with 3 products?
+assessment: GOOD 
+Genie SQL:
+SELECT
+  `active_products`,
+  COUNT(*) AS `customers`,
+  ROUND(AVG(`clv`), 0) AS `avg_clv_usd`
+FROM `c360_bank`.`customer_lifetime_value`.`gold_customer_clv`
+WHERE `active_products` IS NOT NULL
+  AND `active_products` IN (1, 3)
+GROUP BY `active_products`
+ORDER BY `active_products`
+
+Q: What is the average number of active products per customer by segment?
+assessment: GOOD 
+Genie SQL:
+SELECT `segment`, COUNT(*) AS `customers`, ROUND(AVG(`active_products`), 2) AS `avg_active_products`
+FROM `c360_bank`.`customer_lifetime_value`.`gold_customer_360`
+GROUP BY `segment`
+ORDER BY `segment`
+
+Q: What is the total CLV by segment?
+assessment: GOOD 
+Genie SQL:
+SELECT `segment`, COUNT(*) AS `customers`, ROUND(SUM(`clv`), 0) AS `total_clv_usd` FROM `c360_bank`.`customer_lifetime_value`.`gold_customer_clv` GROUP BY `segment` ORDER BY `segment`

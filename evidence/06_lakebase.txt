@@ -1,7 +1,7 @@
 # Evidence 06: Lakebase operational serving (synced tables, Postgres access control, feedback loop)
-# Captured 2026-11-18T21:41:13Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-18T23:58:52Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-Job 'c360_serve' run 1044127693401512: SUCCESS, started 2026-11-18T21:33:22Z, 1.9 min. Tasks: postgres_setup=SUCCESS, serving_tables=SUCCESS, refresh_synced_tables=SUCCESS
+Job 'c360_serve' run 810551394283758: SUCCESS, started 2026-11-18T22:48:13Z, 2.0 min. Tasks: postgres_setup=SUCCESS, serving_tables=SUCCESS, refresh_synced_tables=SUCCESS
 
 ## Task stdout: JSON summary (refresh_synced_tables)
 {
@@ -31,6 +31,7 @@ Job 'c360_serve' run 1044127693401512: SUCCESS, started 2026-11-18T21:33:22Z, 1.
 {
   "step": "postgres_setup",
   "status": "ok",
+  "app_role_granted": true,
   "checks": {
     "synced_customers_total": 50000,
     "roster_banker": {

@@ -1,5 +1,5 @@
 # Evidence 05: GenAI banker explanations (databricks-claude-haiku-5-5 via ai_query)
-# Captured 2026-11-18T21:41:05Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-18T23:58:44Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
 Job 'c360_ml' run 694595022248792: SUCCESS, started 2026-11-18T20:15:49Z, 10.6 min. Tasks: explanations=SUCCESS, clv_assumptions=SUCCESS, train_and_score=SUCCESS
 

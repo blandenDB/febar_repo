@@ -90,6 +90,8 @@
           "- Branch means home_branch_id. Segment is one of mass, mass_affluent, affluent. For the few records not matched to a core banking customer, segment is NULL in gold_customer_360 and 'unknown' in gold_customer_clv.\n",
           "- \"Product penetration\" means the share of customers holding a product.\n",
           "- Return shares, rates and penetration as a fraction between 0 and 1 (for example 0.627), not a percentage, unless the user asks for a percentage.\n",
+          "- Segment values are exact codes: filter with equality (segment = 'affluent'), never LIKE or ILIKE. \"Affluent\" means segment = 'affluent' only; it does not include 'mass_affluent'.\n",
+          "- Round shares to 3 decimal places and dollar amounts to whole dollars.\n",
           "- When grouping by segment, keep the NULL segment as its own group (records not matched to core banking) unless the user asks to exclude it.\n",
           "- CLV and expected CLV uplift are estimates based on illustrative margin and retention assumptions. Say so when you report CLV figures and round dollar amounts to whole dollars.\n",
           "- Data is as of 2026-10-31.\n",

@@ -29,3 +29,5 @@
 | 2026-11-18 | c360_serve and c360_feedback_sync jobs run in the workspace | (none) | 4 synced tables ONLINE; Postgres checks: roster banker 6,597 customers (BR001, BR002), not in roster 0, no identity 0, base tables denied, other-branch feedback rejected; feedback copy ran with 0 rows (no app usage yet). Evidence in evidence/06_lakebase.txt |
 | 2026-11-18 | Genie benchmark run 1: 8 of 10 | Misses: share returned as a percentage instead of a fraction; NULL segment group dropped | Added both conventions to the space instructions; reran |
 | 2026-11-18 | Deployed Genie space (bundle genie_spaces) and Streamlit app c360-banker with a Lakebase postgres resource; c360_serve granted the app service principal role | (none) | App RUNNING; logs show a clean start |
+| 2026-11-18 | Genie benchmark run 2: 8 good, 1 needs review (unrounded share), 1 bad | "affluent" filtered with ILIKE %affluent%, which also matched mass_affluent | Instruction: exact equality on segment codes; round shares to 3 decimals; reran |
+| 2026-11-18 | Genie benchmark run 3 | (none) | 10 of 10 correct. Evidence in evidence/07_genie.txt |
