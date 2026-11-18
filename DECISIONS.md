@@ -50,3 +50,9 @@
 - **Decision:** rules-based matching in SQL. Normalize identifying fields, then match in tiers: (1) exact synthetic tax-ID token, (2) email plus date of birth, (3) normalized name plus date of birth plus ZIP. Each match records its rule. Precision and recall are measured against generator ground truth.
 - **Options considered:** (A) rules-based SQL; (B) rules plus fuzzy name similarity; (C) ML pair matching.
 - **Why:** [YOUR WORDS]
+
+## 2026-11-18: Access rules
+
+- **Decision:** two groups, `c360_business_analysts` (Genie) and `c360_relationship_bankers` (app). Analysts see all customers with direct identifiers masked (name, email, date of birth); bankers see full detail only for customers in their assigned branches. Quarantine and ground truth are not granted to either group. Add table/column comments and PII tags.
+- **Options considered:** (A) groups plus column masks plus row filter; (B) tag-based ABAC policies; (C) grants only.
+- **Why:** [YOUR WORDS]
