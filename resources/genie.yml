@@ -1,0 +1,7 @@
+resources:
+  genie_spaces:
+    c360_analyst:
+      title: Customer 360 and CLV (business analysts)
+      description: Ask about customers, product penetration, customer lifetime value, cross-sell recommendations and banker feedback. Synthetic data; identifiers are masked for analysts.
+      warehouse_id: ${var.warehouse_id}
+      file_path: ../src/genie/c360_analyst.geniespace.json

@@ -29,7 +29,7 @@ resources:
               - --sql-file
               - ${workspace.file_path}/src/serve/02_postgres_setup.sql
               - --app-role
-              - ${var.app_postgres_role}
+              - ${resources.apps.c360_banker_app.service_principal_client_id}
       environments:
         - environment_key: serve
           spec:

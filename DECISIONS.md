@@ -109,3 +109,15 @@
 - **Options considered:** (A) synced reads + feedback write-back + Postgres row-level security; (B) synced reads only with filtering in app code; (C) no Lakebase, app reads UC through the SQL warehouse.
 - **Context:** syncs run as the data owner, so UC row filters do not carry into Postgres; access must be enforced again there.
 - **Why:** [YOUR WORDS]
+
+## 2026-11-18: Genie space
+
+- **Decision:** analyst portfolio space over gold_customer_360, gold_product_holdings, gold_customer_clv, gold_cross_sell_recommendations and banker_feedback, with instructions and sample questions.
+- **Options considered:** (A) analyst portfolio space; (B) minimal (customer 360 and recommendations); (C) A plus quarantine_records.
+- **Why:** [YOUR WORDS]
+
+## 2026-11-18: App stack
+
+- **Decision:** Streamlit Databricks App reading the Lakebase `app` views and writing banker_feedback. Screens: My book, Customer 360 with recommendations and explanation, Record outcome.
+- **Options considered:** (A) Streamlit; (B) FastAPI plus React; (C) Dash.
+- **Why:** [YOUR WORDS]

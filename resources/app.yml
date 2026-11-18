@@ -1,0 +1,13 @@
+resources:
+  apps:
+    c360_banker_app:
+      name: c360-banker
+      description: Relationship banker app - customer 360, next best product with explanation, and outcome recording (synthetic data)
+      source_code_path: ../src/app
+      resources:
+        - name: lakebase
+          description: Lakebase database with the app views and banker_feedback
+          postgres:
+            branch: projects/c360-serving/branches/production
+            database: projects/c360-serving/branches/production/databases/db-ecba-0jhlsoc3s5
+            permission: CAN_CONNECT_AND_CREATE
