@@ -1,0 +1,22 @@
+resources:
+  pipelines:
+    c360_pipeline:
+      name: c360_lakeflow_pipeline
+      catalog: ${var.catalog}
+      schema: ${resources.schemas.customer_lifetime_value.name}
+      serverless: true
+      channel: CURRENT
+      configuration:
+        raw_root: /Volumes/${var.catalog}/${var.schema}/${resources.volumes.raw.name}
+        as_of_date: "2026-10-31"
+      libraries:
+        - file:
+            path: ../src/pipeline/01_bronze.sql
+        - file:
+            path: ../src/pipeline/02_silver_identities.sql
+        - file:
+            path: ../src/pipeline/03_silver_products.sql
+        - file:
+            path: ../src/pipeline/04_identity_matching.sql
+        - file:
+            path: ../src/pipeline/05_gold.sql

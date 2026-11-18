@@ -43,7 +43,7 @@
 - **Decision:** quarantine. Rows that pass the rules flow to the clean (silver) tables; rows that fail go to `quarantine_*` tables tagged with the rules they broke. Per-rule counts come from the pipeline event log as evidence.
 - **Options considered:** (A) quarantine; (B) drop with expectations; (C) mixed fail/quarantine/warn.
 - **Why:** [YOUR WORDS]
-- **Open:** whether exact duplicate rows are quarantined or just deduplicated (see the next entry).
+- **Duplicates:** exact duplicate rows are deduplicated (one copy kept, count removed reported), not quarantined. Option considered: quarantine them like other failures. Why: [YOUR WORDS]
 
 ## 2026-11-18: Customer matching
 

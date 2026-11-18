@@ -144,7 +144,7 @@ def make_people(rng, n):
         dtype=object)
     tax = unique_ids(rng, "TT", n, width=9)
     segment = rng.choice(SEGMENTS, n, p=SEG_P).astype(object)
-    max_tenure = np.minimum((age - 18) * 365, 30 * 365).astype(int)
+    max_tenure = np.clip((age - 18) * 365, 0, 30 * 365).astype(int)  # never after AS_OF
     since = AS_OF - pd.to_timedelta((rng.random(n) * max_tenure).astype(int), unit="D")
     branch = np.array([f"BR{(i * 3 + b) % 25 + 1:03d}" for i, b in
                        zip(region_idx, rng.integers(0, 3, n))], dtype=object)
