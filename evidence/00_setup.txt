@@ -1,0 +1,30 @@
+# Evidence 00: workspace, catalog and schema setup
+# Captured 2026-11-18T16:31:13Z. User identities redacted.
+
+$ databricks bundle validate --profile febar
+Name: febar_c360_bank
+Target: febar
+Workspace:
+  Host: https://fevm-febar-c360-bank.cloud.databricks.com
+  User: <user>
+  Path: /Workspace/Users/<user>/.bundle/febar_c360_bank/febar
+
+Validation OK!
+
+$ databricks bundle deploy --profile febar   (second run, idempotency check)
+Uploading bundle files to /Workspace/Users/<user>/.bundle/febar_c360_bank/febar/files...
+Files: 1 uploaded, 0 deleted
+Resources: 0 created, 0 changed, 0 deleted, 1 unchanged
+
+$ databricks schemas list c360_bank --profile febar
+Full Name                          Owner                          Comment
+c360_bank.customer_lifetime_value  <user>  FE Bar customer 360 and lifetime value build (synthetic data only)
+c360_bank.information_schema       System user                    Information schema (auto-created)
+
+$ databricks schemas get c360_bank.customer_lifetime_value --profile febar
+{
+  "full_name": "c360_bank.customer_lifetime_value",
+  "catalog_name": "c360_bank",
+  "name": "customer_lifetime_value",
+  "comment": "FE Bar customer 360 and lifetime value build (synthetic data only)"
+}

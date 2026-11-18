@@ -1,0 +1,6 @@
+resources:
+  schemas:
+    customer_lifetime_value:
+      catalog_name: ${var.catalog}
+      name: ${var.schema}
+      comment: FE Bar customer 360 and lifetime value build (synthetic data only)

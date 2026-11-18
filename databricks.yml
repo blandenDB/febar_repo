@@ -1,0 +1,22 @@
+bundle:
+  name: febar_c360_bank
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for the build
+    default: c360_bank
+  schema:
+    description: Schema that holds every table, volume and model
+    default: customer_lifetime_value
+  warehouse_id:
+    description: Serverless SQL warehouse used for queries, Genie and the app
+    default: 7252b2dd64dc2427
+
+targets:
+  febar:
+    default: true
+    workspace:
+      host: https://fevm-febar-c360-bank.cloud.databricks.com
