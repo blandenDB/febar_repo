@@ -1,0 +1,25 @@
+resources:
+  jobs:
+    c360_build:
+      name: c360_build
+      description: Applies access policies, then refreshes the Lakeflow pipeline (which attaches them to the gold tables)
+      tasks:
+        - task_key: access_policies
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/governance/01_access_policies.sql
+              source: WORKSPACE
+        - task_key: refresh_pipeline
+          depends_on:
+            - task_key: access_policies
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.c360_pipeline.id}
+        - task_key: pii_tags
+          depends_on:
+            - task_key: refresh_pipeline
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../src/governance/02_pii_tags.sql
+              source: WORKSPACE

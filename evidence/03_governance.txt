@@ -1,0 +1,102 @@
+# Evidence 03: Unity Catalog governance (entitlements, column masks, row filters, tags)
+# Captured 2026-11-18T18:50:34Z. Job c360_build run 4517617597496 (access_policies -> refresh_pipeline -> pii_tags): TERMINATED SUCCESS.
+# Method: the same queries are run while the caller's entitlement is switched between personas, then restored to data_owner. Synthetic data only; user identities redacted.
+
+$ python3 tools/run_sql.py --profile febar --warehouse <id> tools/checks/03_governance.sql
+## Masks and row filters attached to the gold tables
+table_name                     column_name     policy                                                
+-----------------------------  --------------  ------------------------------------------------------
+gold_customer_360              date_of_birth   c360_bank.customer_lifetime_value.c360_mask_pii_date  
+gold_customer_360              email           c360_bank.customer_lifetime_value.c360_mask_pii_string
+gold_customer_360              first_name      c360_bank.customer_lifetime_value.c360_mask_pii_string
+gold_customer_360              home_branch_id  c360_bank.customer_lifetime_value.c360_branch_filter  
+gold_customer_360              last_name       c360_bank.customer_lifetime_value.c360_mask_pii_string
+gold_digital_product_interest  home_branch_id  c360_bank.customer_lifetime_value.c360_branch_filter  
+gold_product_holdings          home_branch_id  c360_bank.customer_lifetime_value.c360_branch_filter  
+
+## [data_owner] persona, rows visible, sample identifiers
+persona     customers_visible  branches_visible  holdings_visible
+----------  -----------------  ----------------  ----------------
+data_owner  50186              25                125424          
+
+## [data_owner] sample rows
+customer_360_id  first_name  last_name  email                            date_of_birth  age  home_branch_id  active_products
+---------------  ----------  ---------  -------------------------------  -------------  ---  --------------  ---------------
+C10002946        Linda       Garcia     linda.garcia12691@example.com    1993-07-06     33   BR002           3              
+C10004208        Linda       Nelson     linda.nelson4153@example.com     2000-04-24     26   BR004           1              
+C10004893        Margaret    White      margaret.white43809@example.com  1942-06-24     84   BR010           3              
+
+## switch caller to business_analyst
+num_affected_rows
+-----------------
+1                
+
+## [business_analyst] persona, rows visible
+persona           customers_visible  branches_visible  holdings_visible
+----------------  -----------------  ----------------  ----------------
+business_analyst  50186              25                125424          
+
+## [business_analyst] same sample rows: identifiers masked, age still available
+customer_360_id  first_name    last_name     email         date_of_birth  age  home_branch_id  active_products
+---------------  ------------  ------------  ------------  -------------  ---  --------------  ---------------
+C10002946        ***MASKED***  ***MASKED***  ***MASKED***  NULL           33   BR002           3              
+C10004208        ***MASKED***  ***MASKED***  ***MASKED***  NULL           26   BR004           1              
+C10004893        ***MASKED***  ***MASKED***  ***MASKED***  NULL           84   BR010           3              
+
+## switch caller to relationship_banker for branches BR001 and BR002
+num_affected_rows
+-----------------
+1                
+
+## [relationship_banker] persona, rows visible (assigned branches only)
+persona              customers_visible  branches_visible  holdings_visible
+-------------------  -----------------  ----------------  ----------------
+relationship_banker  6597               BR001,BR002       16529           
+
+## [relationship_banker] sample rows: full identifiers, own branches only
+customer_360_id  first_name  last_name  email                           date_of_birth  age  home_branch_id  active_products
+---------------  ----------  ---------  ------------------------------  -------------  ---  --------------  ---------------
+C10002946        Linda       Garcia     linda.garcia12691@example.com   1993-07-06     33   BR002           3              
+C10023688        Linda       Lopez      linda.lopez24874@example.com    1983-05-20     43   BR001           1              
+C10029252        Maria       Ramirez    maria.ramirez46493@example.com  2006-02-12     20   BR001           1              
+
+## switch caller to a principal with no entitlement
+num_affected_rows
+-----------------
+1                
+
+## [no entitlement] rows visible
+persona  customers_visible
+-------  -----------------
+none     0                
+
+## restore caller to data_owner
+num_affected_rows
+-----------------
+1                
+
+## [restored] persona and rows visible
+persona     customers_visible
+----------  -----------------
+data_owner  50186            
+
+## Data owner check: branch split of the full table (expected banker count = BR001 + BR002)
+home_branch_id  customers
+--------------  ---------
+BR001           3314     
+BR002           3283     
+
+## Tags on gold_customer_360 columns
+table_name         column_name    tag_name       tag_value    
+-----------------  -------------  -------------  -------------
+gold_customer_360  date_of_birth  c360_pii_type  date_of_birth
+gold_customer_360  email          c360_pii_type  email        
+gold_customer_360  first_name     c360_pii_type  name         
+gold_customer_360  last_name      c360_pii_type  name         
+
+## Table tags
+table_name                tag_name             tag_value     
+------------------------  -------------------  --------------
+c360_access_entitlements  c360_sensitivity     access_control
+gold_customer_360         data_classification  pii           
+

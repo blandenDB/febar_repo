@@ -5,12 +5,13 @@ CLI profile (no tokens are read or printed here).
 
 Usage:
   python3 tools/run_sql.py --profile febar --warehouse <id> file.sql [file2.sql ...]
-Statements in a file are separated by lines containing only ';'. A line starting
+Statements are separated by ';' at the end of a line. A line starting
 with '-- title:' before a statement sets the heading printed above its result.
 """
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 
@@ -31,7 +32,9 @@ def run(profile, warehouse, sql):
 def table(d):
     if d["status"]["state"] != "SUCCEEDED":
         return f"ERROR: {d['status'].get('error', {}).get('message', d['status'])}"
-    cols = [c["name"] for c in d["manifest"]["schema"]["columns"]]
+    cols = [c["name"] for c in d.get("manifest", {}).get("schema", {}).get("columns", [])]
+    if not cols:
+        return "OK"
     rows = d.get("result", {}).get("data_array", []) or []
     rows = [["NULL" if v is None else str(v) for v in r] for r in rows]
     w = [max([len(c)] + [len(r[i]) for r in rows]) for i, c in enumerate(cols)]
@@ -47,7 +50,7 @@ def main():
     a = ap.parse_args()
     ok = True
     for f in a.files:
-        chunks = open(f).read().split("\n;\n")
+        chunks = re.split(r";[ \t]*(?:\n|$)", open(f).read())
         for chunk in chunks:
             lines = [l for l in chunk.strip().splitlines()]
             title = next((l[len("-- title:"):].strip() for l in lines if l.startswith("-- title:")), None)
@@ -56,7 +59,8 @@ def main():
                 continue
             d = run(a.profile, a.warehouse, sql)
             ok &= d["status"]["state"] == "SUCCEEDED"
-            print(f"## {title or sql.splitlines()[0][:80]}")
+            first = next((l for l in sql.splitlines() if l.strip() and not l.startswith("--")), sql)
+            print(f"## {title or first[:100]}")
             print(table(d))
             print()
     sys.exit(0 if ok else 1)

@@ -56,3 +56,10 @@
 - **Decision:** two groups, `c360_business_analysts` (Genie) and `c360_relationship_bankers` (app). Analysts see all customers with direct identifiers masked (name, email, date of birth); bankers see full detail only for customers in their assigned branches. Quarantine and ground truth are not granted to either group. Add table/column comments and PII tags.
 - **Options considered:** (A) groups plus column masks plus row filter; (B) tag-based ABAC policies; (C) grants only.
 - **Why:** [YOUR WORDS]
+
+## 2026-11-18: How personas are identified (access rules follow-up)
+
+- **Decision:** an entitlement table `c360_access_entitlements` maps each principal (user or service principal) to a persona (`data_owner`, `business_analyst`, `relationship_banker`) and, for bankers, the branches they serve. UC column masks and row filters look up `current_user()` in it. The app's service principal will be the banker principal.
+- **Options considered:** entitlement table; ask an account admin for account-level groups; dynamic views only.
+- **Context:** FEVM workspace admins can only create workspace-local groups, which Unity Catalog rejects (`PRINCIPAL_DOES_NOT_EXIST`).
+- **Why:** [YOUR WORDS]
