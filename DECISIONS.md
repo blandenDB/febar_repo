@@ -181,3 +181,9 @@ Reconfirmed from earlier entries (unchanged): ingestion with Auto Loader from fi
 - **Options considered:** one more file-arrival attempt on a dedicated landing volume, then a schedule; a schedule now; keep investigating the file-arrival trigger.
 - **Context:** the file arrival trigger on /Volumes/c360_bank/customer_lifetime_value/raw/_landing/ was configured and unpaused, but the platform never evaluated it (trigger_state stayed empty) and two drop markers written after it went live started no run.
 - **Why:** [REWRITE IN YOUR WORDS]
+
+## 2026-11-19: Business deck and role-play [REWRITE IN YOUR WORDS]
+
+- **Decision:** problem-led storyline (about 10 slides) for the EVP Data & Analytics and the CDO; Google Slides on the Databricks template, exported to PDF and committed; role-play prep with likely questions and evidence, hard objections, and a practice script with a demo path.
+- **Options considered:** storyline problem-led, value-led or demo-led; format Markdown plus PDF, Google Slides plus PDF, or Markdown only.
+- **Why:** [REWRITE IN YOUR WORDS]
