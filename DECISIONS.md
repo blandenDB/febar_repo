@@ -121,3 +121,9 @@
 - **Decision:** Streamlit Databricks App reading the Lakebase `app` views and writing banker_feedback. Screens: My book, Customer 360 with recommendations and explanation, Record outcome.
 - **Options considered:** (A) Streamlit; (B) FastAPI plus React; (C) Dash.
 - **Why:** [YOUR WORDS]
+
+## 2026-11-19: Use case framing
+
+- **Decision:** USE_CASE.md approved. Prototype scale stays at 50,000 synthetic customers and 25 branches (a stated sample of a 1.3M-customer, 522-branch bank). CRM is out of the system scope (4 systems). Win measure: cross-sell campaign response rate of 4% or more at 6 months, from 1.5% today.
+- **Options considered:** raise the synthetic scale; add a CRM source; keep assumed baselines.
+- **Why:** [YOUR WORDS]
