@@ -127,3 +127,31 @@
 - **Decision:** USE_CASE.md approved. Prototype scale stays at 50,000 synthetic customers and 25 branches (a stated sample of a 1.3M-customer, 522-branch bank). CRM is out of the system scope (4 systems). Win measure: cross-sell campaign response rate of 4% or more at 6 months, from 1.5% today.
 - **Options considered:** raise the synthetic scale; add a CRM source; keep assumed baselines.
 - **Why:** [YOUR WORDS]
+
+## 2026-11-19: Build plan decisions [REWRITE IN YOUR WORDS]
+
+Reconfirmed from earlier entries (unchanged): ingestion with Auto Loader from files in a UC volume (alternative: Lakeflow Connect or JDBC from SQL Server); four systems merged (alternative: one source); quarantine plus dedupe with warn-only identity checks and no failing rule (alternative: fail the update on a null core customer ID); personas data owner, business analyst and relationship banker (alternative: add a CDO auditor persona); Lakebase synced tables from gold plus a separate banker_feedback table (alternative: one job-upserted table that keeps human edits); propensity model plus ai_query explanations (alternative: only one); Streamlit app with My book, Customer 360 and Record outcome (alternative: FastAPI and React).
+
+### Non-admin identity for the access test
+
+- **Decision:** a dedicated service principal `c360-access-tester`, entitled first as business_analyst and then as relationship_banker, runs the access queries with a short-lived OAuth secret held only in memory and deleted after the test.
+- **Options considered:** dedicated test service principal; the app's service principal.
+- **Why:** [REWRITE IN YOUR WORDS]
+
+### How AI output is evaluated
+
+- **Decision:** the rule checks on every explanation, plus an LLM judge (MLflow GenAI evaluation) on 200 sampled explanations for groundedness, relevance and an opening question. Bars in EVAL_PROTOCOL.md.
+- **Options considered:** rule checks plus LLM judge; rule checks only.
+- **Why:** [REWRITE IN YOUR WORDS]
+
+### Evaluation protocol
+
+- **Decision:** EVAL_PROTOCOL.md (committed 2026-11-19 before the test ran): simple baseline = recent product page views; out-of-time test on the newest 60-day window; main measure = top-decile lift; claim only if lift >= 2.7x and >= 1.2x the baseline's lift.
+- **Options considered:** report only the existing out-of-customer results; a protocol with a weaker bar (beat the base rate only).
+- **Why:** [REWRITE IN YOUR WORDS]
+
+### Trigger
+
+- **Decision:** one end-to-end job triggered by file arrival on the raw volume, so it runs when the end-of-day files land.
+- **Options considered:** file arrival; daily schedule after the batch window; manual runs.
+- **Why:** [REWRITE IN YOUR WORDS]
