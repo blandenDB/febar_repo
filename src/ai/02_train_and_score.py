@@ -158,22 +158,35 @@ def lifetime_multiplier(n_products, params):
 
 
 def signals(row):
-    """Plain facts a banker can say out loud; fed to the explanation model."""
+    """Plain, true facts a banker can say out loud; the only input to the explanation model."""
+    name = PRETTY[row.product]
     out = []
     if row.views_product_90d > 0:
         v = int(row.views_product_90d)
-        out.append(f"Viewed the {PRETTY[row.product]} page {v} time{'s' if v != 1 else ''} online in the last 90 days")
+        out.append(f"Viewed the {name} page {v} time{'s' if v != 1 else ''} online in the last 90 days")
     if row.app_starts_product_90d > 0:
-        art = "an" if PRETTY[row.product][0] in "aeiou" else "a"
-        out.append(f"Started an online application for {art} {PRETTY[row.product]} in the last 90 days")
+        art = "an" if name[0] in "aeiou" else "a"
+        out.append(f"Started an online application for {art} {name} in the last 90 days")
     held = [PRETTY[p] for p in ALL_PRODUCTS if getattr(row, f"has_{p}") == 1]
     out.append("Currently holds: " + (", ".join(held) if held else "no active products"))
     if row.product == "heloc" and row.has_mortgage == 1:
         out.append("Has a mortgage with the bank, so home equity may be available")
-    if row.product in ("cd", "money_market", "savings") and row.deposit_balance > 20000:
-        out.append(f"Keeps ${row.deposit_balance:,.0f} in deposit accounts")
-    if row.product == "credit_card" and row.has_checking == 1 and row.has_credit_card == 0:
+    if row.has_checking == 1 and row.has_credit_card == 0 and row.product == "credit_card":
         out.append("Banks with us for checking but has no card with us")
+    if row.deposit_balance > 0:
+        out.append(f"Keeps ${row.deposit_balance:,.0f} in deposit accounts with the bank")
+    if row.loan_balance > 0:
+        out.append(f"Has ${row.loan_balance:,.0f} outstanding on loans with the bank")
+    if row.card_spend_12m > 0:
+        out.append(f"Spent ${row.card_spend_12m:,.0f} on cards with the bank in the last 12 months")
+    if row.is_digital == 1:
+        n = int(row.logins_90d)
+        out.append(f"Logged in to digital banking {n} time{'s' if n != 1 else ''} in the last 90 days")
+    else:
+        out.append("Not enrolled in digital banking")
+    lift = row.lift_vs_base_rate
+    if lift == lift and lift >= 1.5:  # not NaN
+        out.append(f"Customers with a similar profile open a {name} about {lift:.0f} times as often as the average customer")
     tenure = ("joined the bank in the last month" if row.tenure_years < 0.1
               else f"customer for {row.tenure_years:.1f} years")
     out.append(f"{tenure[0].upper()}{tenure[1:]}, {row.segment.replace('_', ' ')} segment")

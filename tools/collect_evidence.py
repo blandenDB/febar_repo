@@ -207,7 +207,14 @@ def eval_protocol(p, jobs):
 def genai_judge(p, jobs):
     run = latest_success(p, jobs["c360_ml"], task="genai_judge")
     summ = task_summary(p, run, "genai_judge")
-    body = run_header(run) + "\n\nProtocol: EVAL_PROTOCOL.md (GenAI section), committed 2026-11-19 before the judge first ran.\n\n"
+    body = run_header(run) + "\n\nProtocol: EVAL_PROTOCOL.md (GenAI section), committed 2026-11-19 before the judge first ran.\n"
+    body += ("\n## History (all runs kept; see EVAL_PROTOCOL.md change notes)\n"
+             "run 1  original prompt              grounded 93.5%  relevant 100%   opener 98.5%  all 92.0%  NOT MET (grounded)  evidence/11_genai_judge_run1.txt\n"
+             "run 2  strict no-inference prompt   grounded 97.0%  relevant 73.5%  opener 97.0%  all 67.5%  NOT MET (all checks) evidence/11_genai_judge_run2.txt\n"
+             "run 3  strict prompt + richer facts grounded 97.0%  relevant 98.0%  opener 100%   all 95.0%  MET                  evidence/11_genai_judge_run3.txt\n"
+             "Sample: 200 explanations chosen by the same rule each run (seeded hash of customer_360_id). Re-scoring before run 3 "
+             "changed which customers have a recommendation, so run 3's sample is chosen the same way but is not the identical 200.\n\n"
+             "## Latest run\n")
     body += "## Verdict\n" + json.dumps(summ.get("verdict"), indent=2) + "\n\n## Pass rates\n"
     body += json.dumps({"sample": summ.get("sample"), "generator": summ.get("generator"), "judge": summ.get("judge"),
                         "pass_rates": summ.get("pass_rates"), "all_checks_pass_rate": summ.get("all_checks_pass_rate")}, indent=2)
