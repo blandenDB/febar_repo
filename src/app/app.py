@@ -26,8 +26,8 @@ PRODUCT_NAMES = {
 # product keeps its color everywhere; values and names are printed on the marks for contrast relief.
 PRODUCT_COLORS = {"savings": "#2a78d6", "cd": "#eb6834", "money_market": "#1baf7a", "mortgage": "#eda100",
                   "auto_loan": "#e87ba4", "heloc": "#008300", "personal_loan": "#6250d6", "credit_card": "#e34948"}
-# Branches use slate tones so they never read as a product.
-BRANCH_COLORS = ["#4b5563", "#c4c9d0", "#1f2937", "#e5e7eb"]
+# Branch colors: navy and burnt orange (chosen by the user), then slate tones for any extra branches.
+BRANCH_COLORS = ["#1f3a68", "#cc5500", "#4b5563", "#c4c9d0"]
 ACTIONS = {"accepted": "Accepted", "follow_up": "Follow up later", "not_interested_now": "Not interested now",
            "declined": "Declined"}
 
@@ -130,8 +130,8 @@ if page == "My book":
     for_bars = book[book["branch"].isin(pick_branch)] if pick_branch else book
 
     by_branch = for_pie.groupby("branch").agg(customers=("customer_360_id", "count")).reindex(branches, fill_value=0).reset_index()
-    # Label ink per slice: white on the dark slates, near-black on the light ones.
-    by_branch["label_ink"] = ["#ffffff" if i % 2 == 0 else "#0b0b0b" for i in range(len(by_branch))]
+    # Label ink per slice: white on navy, burnt orange and dark slate; near-black on light slate.
+    by_branch["label_ink"] = ["#0b0b0b" if i == 3 else "#ffffff" for i in range(len(by_branch))]
     bsel = alt.selection_point(name="branch_pick", fields=["branch"], toggle="event.shiftKey")
     pie_base = alt.Chart(by_branch).encode(
         theta=alt.Theta("customers:Q", stack=True),
@@ -152,12 +152,12 @@ if page == "My book":
     order = list(PRODUCT_COLORS)
     bar_base = alt.Chart(counts).encode(
         x=alt.X("product_name:N", sort=counts.sort_values("customers", ascending=False)["product_name"].tolist(),
-                title=None,
+                title=None, scale=alt.Scale(paddingInner=0.25, paddingOuter=0.1),
                 axis=alt.Axis(labelAngle=0, ticks=False, domain=False, labelPadding=8, labelLimit=120)),
         y=alt.Y("customers:Q", title="Customers",
                 scale=alt.Scale(domain=[0, max(1, int(counts["customers"].max() * 1.15))], nice=False),
                 axis=alt.Axis(grid=True, gridOpacity=0.15, domain=False, ticks=False, tickCount=4)))
-    bars = bar_base.mark_bar(size=24, cornerRadiusEnd=4).encode(
+    bars = bar_base.mark_bar(cornerRadiusEnd=4).encode(
         color=alt.Color("product:N", scale=alt.Scale(domain=order, range=[PRODUCT_COLORS[p] for p in order]),
                         legend=None),
         opacity=alt.condition(psel, alt.value(1.0), alt.value(0.3)),
