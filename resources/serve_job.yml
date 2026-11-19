@@ -1,43 +1,5 @@
 resources:
   jobs:
-    c360_serve:
-      name: c360_serve
-      description: Build owner-only serving tables, refresh Lakebase synced tables, apply Postgres views and row-level security, and verify access
-      tasks:
-        - task_key: serving_tables
-          sql_task:
-            warehouse_id: ${var.warehouse_id}
-            file:
-              path: ../src/serve/01_serving_tables.sql
-              source: WORKSPACE
-        - task_key: refresh_synced_tables
-          depends_on:
-            - task_key: serving_tables
-          environment_key: serve
-          spark_python_task:
-            python_file: ../src/serve/refresh_synced_tables.py
-            parameters:
-              - --tables
-              - ${var.catalog}.serving.pg_customer_360,${var.catalog}.serving.pg_product_holdings,${var.catalog}.serving.pg_recommendations,${var.catalog}.serving.pg_banker_assignments
-        - task_key: postgres_setup
-          depends_on:
-            - task_key: refresh_synced_tables
-          environment_key: serve
-          spark_python_task:
-            python_file: ../src/serve/postgres_setup.py
-            parameters:
-              - --sql-file
-              - ${workspace.file_path}/src/serve/02_postgres_setup.sql
-              - --app-role
-              - ${resources.apps.c360_banker_app.service_principal_client_id}
-      environments:
-        - environment_key: serve
-          spec:
-            client: "2"
-            dependencies:
-              - psycopg[binary]>=3.1
-              - databricks-sdk>=0.60
-
     c360_feedback_sync:
       name: c360_feedback_sync
       description: Copy banker feedback from Lakebase into Unity Catalog (idempotent MERGE)

@@ -98,9 +98,8 @@ Supporting: gold_digital_product_interest (one row per customer and product view
 | resources/schema.yml | schemas `customer_lifetime_value`, `serving`, `pipeline_ops`; volumes `raw` and `ground_truth` |
 | resources/data_job.yml | job c360_generate_raw_data (simulates the source systems landing files) |
 | resources/pipeline.yml | pipeline c360_lakeflow_pipeline |
-| resources/build_job.yml | job c360_build (policies, pipeline, tags); folded into c360_end_to_end (to do) |
-| resources/ml_job.yml | experiment, job c360_ml; folded into c360_end_to_end (to do) |
-| resources/serve_job.yml | jobs c360_serve and c360_feedback_sync; c360_serve folded into c360_end_to_end (to do) |
+| resources/end_to_end_job.yml | MLflow experiment; job c360_end_to_end (12 tasks, daily schedule) |
+| resources/serve_job.yml | job c360_feedback_sync (hourly copy of banker feedback to UC; paused until needed) |
 | resources/lakebase.yml | Lakebase project, 4 synced tables |
 | resources/genie.yml | Genie space |
 | resources/app.yml | app c360-banker with its Lakebase resource |

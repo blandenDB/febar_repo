@@ -1,12 +1,12 @@
 # Evidence 02: Lakeflow pipeline (bronze, silver + quarantine, identity matching, gold)
-# Captured 2026-11-18T23:57:42Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-19T20:24:45Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
 ## Latest pipeline updates (newest first)
+79e99723-7bb9-4c4f-9d6d-2193d7036624  COMPLETED  incremental  2026-11-19T20:04:48Z
+6e3f0b2d-3de9-4f7d-9d5d-e90db76d94f8  COMPLETED  full_refresh  2026-11-19T19:35:11Z
+416492df-be9a-451e-bb83-c33c51a35702  COMPLETED  incremental  2026-11-19T18:40:31Z
 77e8f429-6507-4296-8cfe-1e1567bb49a6  COMPLETED  incremental  2026-11-18T19:18:40Z
 5c32b371-34eb-4046-b146-c24f82609afa  COMPLETED  full_refresh  2026-11-18T19:16:32Z
-da5e8eef-ceb0-4125-98c0-c0cbae0b7157  COMPLETED  incremental  2026-11-18T19:08:27Z
-6ad6809c-e13f-4c5d-995f-5af26d297984  COMPLETED  full_refresh  2026-11-18T19:06:28Z
-3288ab52-e942-4f25-ada3-62a057238ee3  COMPLETED  incremental  2026-11-18T18:47:30Z
 An incremental update after a full refresh leaves bronze row counts unchanged (no duplicate rows on rerun).
 
 ## Row counts per layer

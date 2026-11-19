@@ -1,4 +1,8 @@
 resources:
+  experiments:
+    cross_sell:
+      name: /Users/${workspace.current_user.userName}/c360_cross_sell
+
   jobs:
     c360_end_to_end:
       name: c360_end_to_end

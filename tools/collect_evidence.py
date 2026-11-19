@@ -219,6 +219,10 @@ def genai_judge(p, jobs):
              "run 1  original prompt              grounded 93.5%  relevant 100%   opener 98.5%  all 92.0%  NOT MET (grounded)  evidence/11_genai_judge_run1.txt\n"
              "run 2  strict no-inference prompt   grounded 97.0%  relevant 73.5%  opener 97.0%  all 67.5%  NOT MET (all checks) evidence/11_genai_judge_run2.txt\n"
              "run 3  strict prompt + richer facts grounded 97.0%  relevant 98.0%  opener 100%   all 95.0%  MET                  evidence/11_genai_judge_run3.txt\n"
+             + f"run 4  end-to-end job (latest)      grounded {summ['pass_rates'].get('grounded', 0):.1%}  relevant {summ['pass_rates'].get('relevant', 0):.1%}  "
+             + f"opener {summ['pass_rates'].get('opener', 0):.1%}  all {summ.get('all_checks_pass_rate') or 0:.1%}  "
+             + ("MET" if summ.get('verdict', {}).get('grounded_met') and summ.get('verdict', {}).get('all_checks_met') else "NOT MET")
+             + "  (this file)\n"
              "Sample: 200 explanations chosen by the same rule each run (seeded hash of customer_360_id). Re-scoring before run 3 "
              "changed which customers have a recommendation, so run 3's sample is chosen the same way but is not the identical 200.\n\n"
              "## Latest run\n")
@@ -250,7 +254,7 @@ def setup(p, jobs):
         for key, v in sorted(items.items()):
             lines.append(f"{kind:24s} {key:32s} id={v.get('id')}")
     j = cli(p, "jobs", "get", str(jobs[E2E]))["settings"]
-    lines += ["", f"Job {E2E} trigger: " + json.dumps(j.get("trigger")),
+    lines += ["", f"Job {E2E} schedule: " + json.dumps(j.get("schedule")) + "  (file arrival trigger: " + json.dumps(j.get("trigger")) + ")",
               "Task order: " + ", ".join(f"{t['task_key']}<-[{','.join(d['task_key'] for d in t.get('depends_on', []))}]"
                                           for t in j["tasks"])]
     app = cli(p, "apps", "get", "c360-banker")

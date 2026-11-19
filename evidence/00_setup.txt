@@ -1,30 +1,41 @@
-# Evidence 00: workspace, catalog and schema setup
-# Captured 2026-11-18T16:31:13Z. User identities redacted.
+# Evidence 00: what is deployed (bundle resources, schemas, trigger)
+# Captured 2026-11-19T20:28:03Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-$ databricks bundle validate --profile febar
-Name: febar_c360_bank
-Target: febar
-Workspace:
-  Host: https://fevm-febar-c360-bank.cloud.databricks.com
-  User: <user>
-  Path: /Workspace/Users/<user>/.bundle/febar_c360_bank/febar
+Workspace: https://fevm-febar-c360-bank.cloud.databricks.com  (bundle febar_c360_bank, target febar)
 
-Validation OK!
+apps                     c360_banker_app                  id=c360-banker
+experiments              cross_sell                       id=9324270270268
+genie_spaces             c360_analyst                     id=01f1e3a11b1d1fd29b05b513c1bea937
+jobs                     c360_end_to_end                  id=1030549964609117
+jobs                     c360_feedback_sync               id=55505323781947
+jobs                     generate_raw_data                id=83390472250474
+pipelines                c360_pipeline                    id=3d3a3668-8303-473f-90a0-3674714faf79
+postgres_projects        c360_serving                     id=projects/c360-serving
+postgres_synced_tables   pg_banker_assignments            id=synced_tables/c360_bank.serving.pg_banker_assignments
+postgres_synced_tables   pg_customer_360                  id=synced_tables/c360_bank.serving.pg_customer_360
+postgres_synced_tables   pg_product_holdings              id=synced_tables/c360_bank.serving.pg_product_holdings
+postgres_synced_tables   pg_recommendations               id=synced_tables/c360_bank.serving.pg_recommendations
+schemas                  customer_lifetime_value          id=c360_bank.customer_lifetime_value
+schemas                  pipeline_ops                     id=c360_bank.pipeline_ops
+schemas                  serving                          id=c360_bank.serving
+volumes                  ground_truth                     id=c360_bank.customer_lifetime_value.ground_truth
+volumes                  raw                              id=c360_bank.customer_lifetime_value.raw
 
-$ databricks bundle deploy --profile febar   (second run, idempotency check)
-Uploading bundle files to /Workspace/Users/<user>/.bundle/febar_c360_bank/febar/files...
-Files: 1 uploaded, 0 deleted
-Resources: 0 created, 0 changed, 0 deleted, 1 unchanged
+Job c360_end_to_end schedule: {"pause_status": "UNPAUSED", "quartz_cron_expression": "0 0 6 * * ?", "timezone_id": "America/Chicago"}  (file arrival trigger: null)
+Task order: access_policies<-[], access_test<-[pii_tags], clv_assumptions<-[refresh_pipeline], eval_protocol<-[refresh_pipeline], explanations<-[train_and_score], genai_judge<-[explanations], pii_tags<-[refresh_pipeline], postgres_setup<-[refresh_synced_tables], refresh_pipeline<-[access_policies], refresh_synced_tables<-[serving_tables], serving_tables<-[explanations,pii_tags], train_and_score<-[clv_assumptions]
 
-$ databricks schemas list c360_bank --profile febar
-Full Name                          Owner                          Comment
-c360_bank.customer_lifetime_value  <user>  FE Bar customer 360 and lifetime value build (synthetic data only)
-c360_bank.information_schema       System user                    Information schema (auto-created)
+App c360-banker: RUNNING, compute ACTIVE
 
-$ databricks schemas get c360_bank.customer_lifetime_value --profile febar
-{
-  "full_name": "c360_bank.customer_lifetime_value",
-  "catalog_name": "c360_bank",
-  "name": "customer_lifetime_value",
-  "comment": "FE Bar customer 360 and lifetime value build (synthetic data only)"
-}
+## Schemas in c360_bank and what they hold (Lakeflow internal __materialization tables excluded)
+table_schema             tables  streaming_tables  materialized_views  managed_tables  lakebase_synced
+-----------------------  ------  ----------------  ------------------  --------------  ---------------
+customer_lifetime_value  30      9                 13                  8               0              
+pipeline_ops             1       0                 0                   1               0              
+serving                  12      0                 0                   8               4              
+
+## Volumes
+volume_schema            volume_name   volume_type
+-----------------------  ------------  -----------
+customer_lifetime_value  ground_truth  MANAGED    
+customer_lifetime_value  raw           MANAGED    
+

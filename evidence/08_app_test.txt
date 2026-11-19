@@ -8,6 +8,6 @@ Fix: deterministic ORDER BY (expected_clv_uplift DESC, customer_360_id) and a st
 ## Before the fix (app.py at commit 2c44f1b): 5 picks
 {"old_app_first": "C58495690", "picks_kept": [false, false, false, false, false]}
 
-## After the fix, plus row-click navigation and the branch pie + product column charts (tools/test_app.py)
-{"step": "app_test", "status": "ok", "my_book_rows": 738, "customer_options": 738, "branch_pie_and_product_chart_rendered": true, "first_customer_selected_by_default": true, "picked_4th_customer_kept_after_select": true, "detail_header_matches_pick": true, "kept_after_rerun": true, "five_more_picks_kept": [true, true, true, true, true], "row_click_opens_profile": true, "back_returns_to_book": true, "exceptions": 0}
+## After the fix, current app (row-click navigation, branch pie and product columns), rerun after end-to-end run 179619515379654 (tools/test_app.py)
+{"step": "app_test", "status": "ok", "my_book_rows": 856, "customer_options": 856, "branch_pie_and_product_chart_rendered": true, "first_customer_selected_by_default": true, "picked_4th_customer_kept_after_select": true, "detail_header_matches_pick": true, "kept_after_rerun": true, "five_more_picks_kept": [true, true, true, true, true], "row_click_opens_profile": true, "back_returns_to_book": true, "exceptions": 0}
 Note: AppTest cannot click a table row, slice or column, so it checks both charts render and sets the same session state the row-click callback sets.

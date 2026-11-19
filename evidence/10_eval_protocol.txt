@@ -1,7 +1,7 @@
 # Evidence 10: out-of-time evaluation under EVAL_PROTOCOL.md
-# Captured 2026-11-19T17:55:32Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-19T20:26:09Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-Job 'c360_ml' run 74665276444710: SUCCESS, started 2026-11-19T17:52:47Z, 2.2 min. Tasks: explanations=DISABLED, eval_protocol=SUCCESS, clv_assumptions=DISABLED, train_and_score=DISABLED
+Job 'c360_end_to_end' run 179619515379654: SUCCESS, started 2026-11-19T20:04:26Z, 18.0 min. Tasks: access_policies=SUCCESS, refresh_pipeline=SUCCESS, train_and_score=SUCCESS, postgres_setup=SUCCESS, eval_protocol=SUCCESS, access_test=SUCCESS, genai_judge=SUCCESS, explanations=SUCCESS, serving_tables=SUCCESS, clv_assumptions=SUCCESS, refresh_synced_tables=SUCCESS, pii_tags=SUCCESS
 
 Protocol: EVAL_PROTOCOL.md, committed 2026-11-19 before this test first ran (git commit fb4993f).
 
@@ -18,28 +18,28 @@ Protocol: EVAL_PROTOCOL.md, committed 2026-11-19 before this test first ran (git
 test_rows                        284923
 positives                        1072
 base_rate                        0.00376
-model_top_decile_lift            8.228
+model_top_decile_lift            8.274
 baseline_top_decile_lift         6.465
 model_auc                        0.946
 baseline_auc                     0.875
-model_vs_baseline_lift_ratio     1.273
+model_vs_baseline_lift_ratio     1.28
 
 ## Per product (claims only where positives >= 30)
 product         positives model_lift base_lift model_auc  usable
-savings               364      5.965      5.25      0.87  True
-cd                     83       7.47     5.904      0.93  True
-money_market           67      7.314      5.97     0.932  True
-mortgage               78      7.051     4.744     0.895  True
-auto_loan             125       7.52      5.28     0.926  True
-heloc                  21      7.143      3.81      0.88  False
-personal_loan          60      7.168     5.668     0.908  True
-credit_card           274      7.081     6.059     0.915  True
+savings               364      6.213      5.25     0.872  True
+cd                     83      7.711     5.904     0.931  True
+money_market           67      7.463      5.97     0.937  True
+mortgage               78      7.051     4.744     0.897  True
+auto_loan             125       7.84      5.28     0.928  True
+heloc                  21      7.143      3.81     0.882  False
+personal_loan          60      7.502     5.668     0.907  True
+credit_card           274      7.117     6.059     0.916  True
 
 ## Out-of-customer subset (customers not in any training snapshot)
 {
   "test_rows": 6246,
   "positives": 178,
-  "model_top_decile_lift": 8.266,
+  "model_top_decile_lift": 8.21,
   "baseline_top_decile_lift": 6.973
 }
 
@@ -60,35 +60,35 @@ credit_card           274      7.081     6.059     0.915  True
     "test_rows": 284923,
     "positives": 1072,
     "base_rate": 0.00376,
-    "model_top_decile_lift": 8.228,
+    "model_top_decile_lift": 8.274,
     "baseline_top_decile_lift": 6.465,
     "model_auc": 0.946,
     "baseline_auc": 0.875,
-    "model_vs_baseline_lift_ratio": 1.273
+    "model_vs_baseline_lift_ratio": 1.28
   },
   "per_product": {
     "savings": {
       "test_rows": 14559,
       "positives": 364,
-      "model_lift": 5.965,
+      "model_lift": 6.213,
       "baseline_lift": 5.25,
-      "model_auc": 0.87,
+      "model_auc": 0.872,
       "usable_for_claims": true
     },
     "cd": {
       "test_rows": 41230,
       "positives": 83,
-      "model_lift": 7.47,
+      "model_lift": 7.711,
       "baseline_lift": 5.904,
-      "model_auc": 0.93,
+      "model_auc": 0.931,
       "usable_for_claims": true
     },
     "money_market": {
       "test_rows": 42681,
       "positives": 67,
-      "model_lift": 7.314,
+      "model_lift": 7.463,
       "baseline_lift": 5.97,
-      "model_auc": 0.932,
+      "model_auc": 0.937,
       "usable_for_claims": true
     },
     "mortgage": {
@@ -96,15 +96,15 @@ credit_card           274      7.081     6.059     0.915  True
       "positives": 78,
       "model_lift": 7.051,
       "baseline_lift": 4.744,
-      "model_auc": 0.895,
+      "model_auc": 0.897,
       "usable_for_claims": true
     },
     "auto_loan": {
       "test_rows": 35401,
       "positives": 125,
-      "model_lift": 7.52,
+      "model_lift": 7.84,
       "baseline_lift": 5.28,
-      "model_auc": 0.926,
+      "model_auc": 0.928,
       "usable_for_claims": true
     },
     "heloc": {
@@ -112,30 +112,30 @@ credit_card           274      7.081     6.059     0.915  True
       "positives": 21,
       "model_lift": 7.143,
       "baseline_lift": 3.81,
-      "model_auc": 0.88,
+      "model_auc": 0.882,
       "usable_for_claims": false
     },
     "personal_loan": {
       "test_rows": 44519,
       "positives": 60,
-      "model_lift": 7.168,
+      "model_lift": 7.502,
       "baseline_lift": 5.668,
-      "model_auc": 0.908,
+      "model_auc": 0.907,
       "usable_for_claims": true
     },
     "credit_card": {
       "test_rows": 21822,
       "positives": 274,
-      "model_lift": 7.081,
+      "model_lift": 7.117,
       "baseline_lift": 6.059,
-      "model_auc": 0.915,
+      "model_auc": 0.916,
       "usable_for_claims": true
     }
   },
   "out_of_customer": {
     "test_rows": 6246,
     "positives": 178,
-    "model_top_decile_lift": 8.266,
+    "model_top_decile_lift": 8.21,
     "baseline_top_decile_lift": 6.973
   },
   "verdict": {
@@ -145,5 +145,5 @@ credit_card           274      7.081     6.059     0.915  True
     "baseline_ratio_met": true,
     "claim": "SUPPORTED on synthetic data: the method clears the bar"
   },
-  "mlflow_run_id": "e2aa9fe6192c46a8830130f6bbbf7316"
+  "mlflow_run_id": "a6de91a6888849df88903a01222e2bed"
 }

@@ -1,7 +1,7 @@
 # Evidence 03: Unity Catalog governance (entitlements, column masks, row filters, tags)
-# Captured 2026-11-18T23:58:24Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-19T20:25:19Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-Job 'c360_build' run 877757199303544: SUCCESS, started 2026-11-18T19:18:28Z, 2.0 min. Tasks: pii_tags=SUCCESS, access_policies=SUCCESS, refresh_pipeline=SUCCESS
+Job 'c360_end_to_end' run 179619515379654: SUCCESS, started 2026-11-19T20:04:26Z, 18.0 min. Tasks: access_policies=SUCCESS, refresh_pipeline=SUCCESS, train_and_score=SUCCESS, postgres_setup=SUCCESS, eval_protocol=SUCCESS, access_test=SUCCESS, genai_judge=SUCCESS, explanations=SUCCESS, serving_tables=SUCCESS, clv_assumptions=SUCCESS, refresh_synced_tables=SUCCESS, pii_tags=SUCCESS
 Method: the same queries run while the caller's entitlement is switched between personas, then restored to data_owner.
 
 ## Masks and row filters attached to the gold tables
@@ -92,20 +92,16 @@ BR001           3314
 BR002           3283     
 
 ## Tags on gold_customer_360 columns
-table_name            column_name    tag_name       tag_value    
---------------------  -------------  -------------  -------------
-gold_customer_360     date_of_birth  c360_pii_type  date_of_birth
-gold_customer_360     email          c360_pii_type  email        
-gold_customer_360     first_name     c360_pii_type  name         
-gold_customer_360     last_name      c360_pii_type  name         
-serving_customer_360  email          c360_pii_type  email        
-serving_customer_360  first_name     c360_pii_type  name         
-serving_customer_360  last_name      c360_pii_type  name         
+table_name         column_name    tag_name       tag_value    
+-----------------  -------------  -------------  -------------
+gold_customer_360  date_of_birth  c360_pii_type  date_of_birth
+gold_customer_360  email          c360_pii_type  email        
+gold_customer_360  first_name     c360_pii_type  name         
+gold_customer_360  last_name      c360_pii_type  name         
 
 ## Table tags
 table_name                tag_name             tag_value     
 ------------------------  -------------------  --------------
 c360_access_entitlements  c360_sensitivity     access_control
 gold_customer_360         data_classification  pii           
-serving_customer_360      data_classification  pii           
 

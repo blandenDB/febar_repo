@@ -1,7 +1,7 @@
 # Evidence 06: Lakebase operational serving (synced tables, Postgres access control, feedback loop)
-# Captured 2026-11-18T23:58:52Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-19T20:25:51Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-Job 'c360_serve' run 810551394283758: SUCCESS, started 2026-11-18T22:48:13Z, 2.0 min. Tasks: postgres_setup=SUCCESS, serving_tables=SUCCESS, refresh_synced_tables=SUCCESS
+Job 'c360_end_to_end' run 179619515379654: SUCCESS, started 2026-11-19T20:04:26Z, 18.0 min. Tasks: access_policies=SUCCESS, refresh_pipeline=SUCCESS, train_and_score=SUCCESS, postgres_setup=SUCCESS, eval_protocol=SUCCESS, access_test=SUCCESS, genai_judge=SUCCESS, explanations=SUCCESS, serving_tables=SUCCESS, clv_assumptions=SUCCESS, refresh_synced_tables=SUCCESS, pii_tags=SUCCESS
 
 ## Task stdout: JSON summary (refresh_synced_tables)
 {
@@ -37,7 +37,7 @@ Job 'c360_serve' run 810551394283758: SUCCESS, started 2026-11-18T22:48:13Z, 2.0
     "roster_banker": {
       "customers": 6597,
       "branches": "BR001,BR002",
-      "recommendations": 1056
+      "recommendations": 1237
     },
     "not_in_roster": {
       "customers": 0,
@@ -56,20 +56,23 @@ Job 'c360_serve' run 810551394283758: SUCCESS, started 2026-11-18T22:48:13Z, 2.0
 }
 
 ## Synced tables (UC -> Lakebase, SNAPSHOT)
-pg_customer_360  source=c360_bank.customer_lifetime_value.serving_customer_360 (resources/lakebase.yml)  state=SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE
-pg_product_holdings  source=c360_bank.customer_lifetime_value.serving_product_holdings (resources/lakebase.yml)  state=SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE
-pg_recommendations  source=c360_bank.customer_lifetime_value.serving_recommendations (resources/lakebase.yml)  state=SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE
-pg_banker_assignments  source=c360_bank.customer_lifetime_value.serving_banker_assignments (resources/lakebase.yml)  state=SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE
+pg_customer_360  source=c360_bank.serving.serving_customer_360 (resources/lakebase.yml)  state=SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE
+pg_product_holdings  source=c360_bank.serving.serving_product_holdings (resources/lakebase.yml)  state=SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE
+pg_recommendations  source=c360_bank.serving.serving_recommendations (resources/lakebase.yml)  state=SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE
+pg_banker_assignments  source=c360_bank.serving.serving_banker_assignments (resources/lakebase.yml)  state=SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE
 
 ## Feedback back to Unity Catalog
-Job 'c360_feedback_sync' run 414856385371937: SUCCESS, started 2026-11-18T21:36:04Z, 0.9 min. Tasks: feedback_to_uc=SUCCESS
+Job 'c360_feedback_sync' run 688239023297844: SUCCESS, started 2026-11-19T14:25:24Z, 1.0 min. Tasks: feedback_to_uc=SUCCESS
 {
   "step": "feedback_to_uc",
   "status": "ok",
-  "lakebase_rows": 0,
-  "uc_rows_before": 0,
-  "uc_rows_after": 0,
-  "actions": {}
+  "lakebase_rows": 3,
+  "uc_rows_before": 3,
+  "uc_rows_after": 3,
+  "actions": {
+    "accepted": 2,
+    "follow_up": 1
+  }
 }
 
 Access model: UC does not allow syncing tables with row filters or column masks, so owner-only serving_* copies are synced. In Postgres, the app role can read only security_barrier views in schema app that keep the signed-in banker's branches, and banker_feedback has row-level security. The checks above run as a temporary role with exactly the app's grants.
