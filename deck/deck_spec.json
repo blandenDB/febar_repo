@@ -1,11 +1,11 @@
 {
-  "title": "Customer 360 and Next Best Product: Regional Bank Prototype (starter draft)",
+  "title": "Customer 360 and Next Best Product: Regional Bank Prototype (starter draft, architecture template)",
   "slides": [
     {
       "id": "s01-title",
-      "layout": "title",
-      "title": "From 1.5% to 4%: the next best product, for every banker",
-      "subtitle": "A customer 360 and next best product prototype (synthetic data)",
+      "layout": "title_dark",
+      "title": "From 1.5% to 4%",
+      "subtitle": "The next best product, for every banker. A customer 360 prototype (synthetic data)",
       "notes": {
         "purpose": "DRAFT, rewrite in your own words. Open with the outcome the EVP owns, not the technology.",
         "talk_track": "Today our cross-sell campaigns convert at 1.5%. The goal for the next six months is 4% or more. This is a working prototype of how we get there: one view of each customer, a next best product a banker can trust, and a way to learn what works.",
@@ -14,6 +14,20 @@
         ],
         "transition": "Let me start with what a banker deals with today.",
         "likely_question": "Is this real customer data? No. Everything here is synthetic, built to match the bank's systems and scale."
+      }
+    },
+    {
+      "id": "div-1",
+      "layout": "section_break_4",
+      "title": "The opportunity",
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Section divider.",
+        "talk_track": "First, where the bank is today and why it has to change.",
+        "evidence": [
+          "USE_CASE.md sections 2 and 3"
+        ],
+        "transition": "Next section.",
+        "likely_question": "None expected at a divider."
       }
     },
     {
@@ -58,7 +72,7 @@
     },
     {
       "id": "s04-today-tomorrow",
-      "layout": "title_only",
+      "layout": "content_basic",
       "title": "Today versus tomorrow",
       "table": {
         "data": [
@@ -103,8 +117,22 @@
       }
     },
     {
+      "id": "div-2",
+      "layout": "section_break_4",
+      "title": "What we built",
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Section divider.",
+        "talk_track": "Now the prototype: one platform, six stages, and a banker's morning.",
+        "evidence": [
+          "README.md journey table"
+        ],
+        "transition": "Next section.",
+        "likely_question": "None expected at a divider."
+      }
+    },
+    {
       "id": "s05-journey",
-      "layout": "title_only",
+      "layout": "content_basic",
       "title": "One connected platform, six stages",
       "table": {
         "data": [
@@ -179,8 +207,23 @@
       }
     },
     {
+      "id": "div-3",
+      "layout": "section_break_4",
+      "title": "Value and proof",
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Section divider.",
+        "talk_track": "What it is worth, and why you should believe it.",
+        "evidence": [
+          "USE_CASE.md section 6",
+          "EVAL_PROTOCOL.md"
+        ],
+        "transition": "Next section.",
+        "likely_question": "None expected at a divider."
+      }
+    },
+    {
       "id": "s07-value",
-      "layout": "title_only",
+      "layout": "content_basic",
       "title": "What 4% is worth in customer lifetime value",
       "table": {
         "data": [
@@ -230,7 +273,7 @@
     },
     {
       "id": "s08-proof",
-      "layout": "title_only",
+      "layout": "content_basic",
       "title": "How we judged it: bars set before the results",
       "table": {
         "data": [
@@ -280,7 +323,7 @@
     },
     {
       "id": "s09-governance",
-      "layout": "title_only",
+      "layout": "content_basic",
       "title": "Governed by role, tested by someone who is not an admin",
       "table": {
         "data": [
@@ -340,7 +383,7 @@
     },
     {
       "id": "s11-close",
-      "layout": "closing",
+      "layout": "closing_alt",
       "notes": {
         "purpose": "DRAFT. Closing slide.",
         "talk_track": "Thank you.",

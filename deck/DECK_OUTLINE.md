@@ -2,7 +2,7 @@
 
 Audience: the EVP Data & Analytics (sponsor) and the Chief Data Officer (domain owner) of a regional bank. Format: Google Slides on the Databricks template, exported to `deck/deck.pdf`.
 
-Starter deck (2026-11-19): built from `deck/deck_spec.json` as Google Slides (private to the author) and exported to `deck/deck.pdf`. Every slide's text and speaker notes are an AI-drafted starting point, marked DRAFT in the notes; rewrite them in your own words. Screenshots for slide 6 are in `deck/screens/` (synthetic customers, sidebar excluded).
+Starter deck (2026-11-19): built from `deck/deck_spec.json` on the 2025-07 Architecture Slides Template style (14 slides: dark cover, three dark section dividers, cream content slides, dark closing) as Google Slides (private to the author) and exported to `deck/deck.pdf`. Every slide's text and speaker notes are an AI-drafted starting point, marked DRAFT in the notes; rewrite them in your own words. Screenshots for slide 6 are in `deck/screens/` (synthetic customers, sidebar excluded).
 
 How to use this file: each slide lists its **job**, a **[YOUR WORDS]** line for you to write, the **facts** you can draw on (all from this repo, with the source), and a **visual**. Slide text and the narrative are yours; the facts are there so every number is backed. When a slide is ready, replace its [YOUR WORDS] line and I will build it.
 
