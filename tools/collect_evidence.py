@@ -31,11 +31,16 @@ def bundle_ids(profile):
             {k: v.get("id") for k, v in s.get("experiments", {}).items()})
 
 
-def latest_success(profile, job_id):
-    runs = cli(profile, "jobs", "list-runs", "--job-id", str(job_id), "--completed-only", "--limit", "10")
+def latest_success(profile, job_id, task=None):
+    """Latest successful run (optionally: the latest one that ran `task` successfully)."""
+    runs = cli(profile, "jobs", "list-runs", "--job-id", str(job_id), "--completed-only", "--limit", "25")
     for r in runs if isinstance(runs, list) else runs.get("runs", []):
-        if r.get("state", {}).get("result_state") == "SUCCESS":
-            return cli(profile, "jobs", "get-run", str(r["run_id"]))
+        if r.get("state", {}).get("result_state") != "SUCCESS":
+            continue
+        full = cli(profile, "jobs", "get-run", str(r["run_id"]))
+        if task is None or any(t["task_key"] == task and t.get("state", {}).get("result_state") == "SUCCESS"
+                               for t in full.get("tasks", [])):
+            return full
     raise SystemExit(f"no successful run for job {job_id}")
 
 
@@ -101,7 +106,7 @@ def main():
           "then restored to data_owner.\n\n" + sql(p, wh, "tools/checks/03_governance.sql"))
 
     # 04 ML
-    run = latest_success(p, jobs["c360_ml"])
+    run = latest_success(p, jobs["c360_ml"], task="train_and_score")
     summ = task_summary(p, run, "train_and_score")
     model = summ.get("model")
     versions = subprocess.run(["databricks", "api", "get", f"/api/2.1/unity-catalog/models/{model}/versions",
@@ -122,7 +127,7 @@ def main():
 
     # 05 GenAI
     write("05_genai.txt", "Evidence 05: GenAI banker explanations (databricks-claude-haiku-5-5 via ai_query)",
-          run_header(run) + "\n\n" + sql(p, wh, "tools/checks/05_genai.sql")
+          run_header(latest_success(p, jobs["c360_ml"], task="explanations")) + "\n\n" + sql(p, wh, "tools/checks/05_genai.sql")
           + "\nReview note: explanations flagged by mentions_offer_or_rate were read by hand. They say the product "
             "fits 'without relying on any specific rate, fee, or promotion' (echoing the instruction), not an invented offer.\n")
 
@@ -131,6 +136,9 @@ def main():
 
     # 07 Genie
     genie(p)
+
+    # 10 Evaluation protocol
+    eval_protocol(p, jobs)
 
 
 def lakebase(p, jobs):
@@ -175,6 +183,22 @@ def genie(p):
         act = (d.get("actual_response") or [{}])[0].get("response", "").strip()
         body += f"\nQ: {x.get('question')}\nassessment: {d.get('assessment')} {d.get('assessment_reasons') or ''}\nGenie SQL:\n{act}\n"
     write("07_genie.txt", "Evidence 07: Genie analyst space and benchmark evaluations", body)
+
+
+def eval_protocol(p, jobs):
+    run = latest_success(p, jobs["c360_ml"], task="eval_protocol")
+    summ = task_summary(p, run, "eval_protocol")
+    o, v = summ.get("overall", {}), summ.get("verdict", {})
+    body = run_header(run) + "\n\nProtocol: EVAL_PROTOCOL.md, committed 2026-11-19 before this test first ran (git commit fb4993f).\n\n"
+    body += "## Verdict\n" + json.dumps(v, indent=2) + "\n\n## Overall (out-of-time test window)\n"
+    body += "\n".join(f"{k:32s} {o.get(k)}" for k in o) + "\n\n## Per product (claims only where positives >= 30)\n"
+    body += f"{'product':15s} {'positives':>9s} {'model_lift':>10s} {'base_lift':>9s} {'model_auc':>9s}  usable\n"
+    for prod, d in summ.get("per_product", {}).items():
+        body += (f"{prod:15s} {d['positives']:>9d} {str(d['model_lift']):>10s} {str(d['baseline_lift']):>9s} "
+                 f"{str(d['model_auc']):>9s}  {d['usable_for_claims']}\n")
+    body += "\n## Out-of-customer subset (customers not in any training snapshot)\n" + json.dumps(summ.get("out_of_customer"), indent=2)
+    body += "\n\n## Full task summary\n" + json.dumps(summ, indent=2) + "\n"
+    write("10_eval_protocol.txt", "Evidence 10: out-of-time evaluation under EVAL_PROTOCOL.md", body)
 
 
 if __name__ == "__main__":

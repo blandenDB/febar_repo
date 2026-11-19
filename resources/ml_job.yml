@@ -39,6 +39,21 @@ resources:
             file:
               path: ../src/ai/03_explanations.sql
               source: WORKSPACE
+        - task_key: eval_protocol
+          depends_on:
+            - task_key: train_and_score
+          environment_key: ml
+          spark_python_task:
+            python_file: ../src/ai/04_eval_protocol.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema
+              - ${var.schema}
+              - --code-dir
+              - ${workspace.file_path}/src/ai
+              - --experiment
+              - ${resources.experiments.cross_sell.name}
       environments:
         - environment_key: ml
           spec:
