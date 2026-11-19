@@ -1,16 +1,16 @@
 # Evidence 11: LLM judge on banker explanations
-# Captured 2026-11-19T18:00:11Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-19T18:13:24Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-Job 'c360_ml' run 66096966141192: SUCCESS, started 2026-11-19T17:56:28Z, 3.1 min. Tasks: explanations=DISABLED, eval_protocol=DISABLED, clv_assumptions=DISABLED, genai_judge=SUCCESS, train_and_score=DISABLED
+Job 'c360_ml' run 190925275649301: SUCCESS, started 2026-11-19T18:03:03Z, 9.9 min. Tasks: explanations=SUCCESS, eval_protocol=DISABLED, clv_assumptions=DISABLED, genai_judge=SUCCESS, train_and_score=DISABLED
 
 Protocol: EVAL_PROTOCOL.md (GenAI section), committed 2026-11-19 before the judge first ran.
 
 ## Verdict
 {
   "grounded_bar": 0.95,
-  "grounded_met": false,
+  "grounded_met": true,
   "all_checks_bar": 0.9,
-  "all_checks_met": true,
+  "all_checks_met": false,
   "claim": "explanations do NOT meet the protocol bar"
 }
 
@@ -20,55 +20,54 @@ Protocol: EVAL_PROTOCOL.md (GenAI section), committed 2026-11-19 before the judg
   "generator": "databricks-claude-haiku-5-5",
   "judge": "databricks-claude-sonnet-5-5",
   "pass_rates": {
-    "grounded": 0.935,
-    "relevant": 1.0,
-    "opener": 0.985
+    "grounded": 0.97,
+    "relevant": 0.735,
+    "opener": 0.97
   },
-  "all_checks_pass_rate": 0.92
+  "all_checks_pass_rate": 0.675
 }
 
 ## Examples of failures with the judge's rationale
 
-- product: credit_card  failed: opener
-  explanation: Why: The customer has banked with us for 3.7 years and holds a checking account but no card with us, and they viewed our credit card page once in the last 90 days, so they have shown some interest without taking the next step. A card could fit their existing banking relationship and make it easier for them to use us for everyday purchases.
+- product: heloc  failed: relevant
+  explanation: Why: The customer holds a checking account and has been with the bank for 1.4 years in the mass segment, so a conversation about a home equity line of credit is a reasonable next step to discuss.
+Opener: "How has your experience banking with us been so far?"
+  judge (relevant): The guideline requires the response to explain why the recommended product (HELOC) fits this particular customer. The response has a 'Why' section that cites the customer's checking account, 1.4-year tenure, and mass segment, then says a HELOC conversation is 'a reasonable next step.' It never links
 
-Opener: "I noticed you've been looking at our credit card
-  judge (opener): The guideline requires the response to include one natural, non-pushy question a banker could ask the customer. The response has a 'Why' section and an 'Opener' that the banker could say. The opener has two question parts: 'What's prompted you to think about a card, and is there anything about it yo
+- product: heloc  failed: relevant
+  explanation: Why: The customer viewed the home equity line of credit page once in the last 90 days, and has held a checking account and been a customer for 0.8 years.
+Opener: "Did anything in particular catch your attention when you looked at the home equity line of credit information online?"
+  judge (relevant): The guideline requires the response to explain why the recommended product (HELOC) fits this particular customer. The response has a 'Why' section that lists customer facts: one view of the HELOC page in the last 90 days, a checking account, and 0.8 years as a customer. These facts are specific to t
 
-- product: mortgage  failed: grounded
-  explanation: Why: The customer is mass affluent and has been with the bank only about two months, holding a checking account and an auto loan, so they have a relationship with the bank but no home-financing product yet. A mortgage is a natural next step for a customer at this income level who is already managing credit responsibly with an auto loan, and it would deepen the relationship without relying on any d
-  judge (grounded): The guideline says the response may only state facts that appear in the customer facts and must not invent details. The customer facts are: holds a checking account and an auto loan, has been a customer for 0.2 years, and is in the mass affluent segment. Several claims in the response match these fa
+- product: cd  failed: grounded
+  explanation: Why: The customer viewed the certificate of deposit page 4 times and started an online application for one in the last 90 days. They have held a checking account, savings account, and auto loan for 1.1 years.
 
-- product: credit_card  failed: opener
-  explanation: Why: The customer has held a checking account for about four months and has viewed the credit card page once in the last 90 days, suggesting early interest in a card. Since they bank with us but hold no card, a credit card could be a natural next step for their everyday spending and can be discussed without assuming any specific terms.
+Opener: "I noticed you've been looking at our certificate of deposit online recently. Would you like to talk through how it works?"
+  judge (grounded): The guideline says the response may only state facts that appear in the customer facts and must not invent details. The customer facts are: 4 views of the CD page in the last 90 days, a started online CD application in the last 90 days, current holdings of a checking account, savings account, and au
 
-Opener: "I noticed you've been looking into our credit card o
-  judge (opener): The guideline requires the response to include exactly one natural, non-pushy question a banker could ask the customer. The response has a 'Why' section with no questions and an 'Opener' section. The opener has two question sentences: 'What's prompting you to consider one, and what would be most use
+- product: heloc  failed: relevant
+  explanation: Why: The customer holds a checking account, a certificate of deposit, and an auto loan, and joined the bank within the last month, so a home equity line of credit is worth discussing as an additional product.
+Opener: "How has your experience with us been so far?"
+  judge (relevant): The guideline requires the response to explain why the recommended product (HELOC) fits this particular customer. The response has a 'Why' section that lists the customer's holdings (checking, CD, auto loan) and says they joined within the last month, then concludes that a HELOC is 'worth discussing
 
-- product: mortgage  failed: grounded
-  explanation: Why: The customer has held a checking account, savings account, personal loan, and credit card for 2.2 years and sits in the mass affluent segment, so they already have a established, multi-product relationship with the bank and a track record of managing credit responsibly. A mortgage is a natural next step for someone with this profile, and the banker can position it as a logical extension of th
-  judge (grounded): The guideline requires that the response only state facts that appear in the customer facts and not invent any details. The customer facts are: holds a checking account, savings account, personal loan, and credit card; has been a customer for 2.2 years; and is in the mass affluent segment. The respo
+- product: personal_loan  failed: relevant
+  explanation: Why: The customer viewed the personal loan page once in the last 90 days, holds checking and savings accounts, and has been a customer for 2.6 years in the mass affluent segment.
+Opener: "I noticed you looked at our personal loan page recently. Was there anything about it you wanted to understand better?"
+  judge (relevant): The guideline requires the response to explain why the recommended product fits this particular customer. The response has a 'Why' section that lists the customer's facts: one view of the personal loan page in the last 90 days, a checking and a savings account, 2.6 years as a customer, and the mass 
 
-- product: mortgage  failed: grounded
-  explanation: Why: The customer has held a checking account, auto loan, and credit card for 2.3 years and sits in the mass affluent segment, which suggests a established, positive relationship and capacity to take on a larger secured borrowing; a mortgage would be a natural next step to deepen the relationship while meeting a likely major financial need.
-Opener: "Have you given any thought lately to whether you
-  judge (grounded): The guideline says the response may only state facts that appear in the customer facts and must not invent numbers, rates, fees, promotions, life events or other details. The customer facts are: holds a checking account, auto loan and credit card; customer for 2.3 years; mass affluent segment. The r
+- product: personal_loan  failed: relevant
+  explanation: Why: The customer viewed the personal loan page once online in the last 90 days, so the product is a natural topic to raise. They currently hold a checking account, have been a customer for 0.3 years, and are in the mass affluent segment.
+Opener: "I noticed you looked at our personal loan information recently. Was there anything about it you wanted to understand better?"
+  judge (relevant): The guideline requires the response to explain why the recommended product fits this particular customer. The response has a 'Why' section that cites the customer's specific facts: one view of the personal loan page in the last 90 days, a checking account, 0.3 years of tenure, and the mass affluent 
 
-- product: heloc  failed: grounded
-  explanation: Why: The customer already holds a mortgage with the bank and has been a customer for 3.0 years, so a home equity line of credit may be available and could give them flexible access to funds without a new application for a separate product. Their existing checking, savings, and mortgage relationships make this a natural next conversation about how they might use home equity.
-Opener: "Have you thoug
-  judge (grounded): The guideline says the response may only state facts that appear in the customer facts, with no invented numbers, rates, fees, promotions, life events or other details. The customer facts are: holds a checking account, savings account and mortgage; has a mortgage with the bank, so home equity may be
+- product: auto_loan  failed: relevant
+  explanation: Why: The customer has held checking, savings, and a credit card with the bank for 1.9 years, and the auto loan is the product being raised in that existing relationship.
+Opener: "How have things been going with your checking, savings, and credit card since you've been with us?"
+  judge (relevant): The guideline requires the response to explain why the recommended product (auto_loan) fits this particular customer. The response has a 'Why' section that cites the customer's holdings (checking, savings, credit card) and 1.9-year tenure. However, it only says the auto loan is 'the product being ra
 
-- product: money_market  failed: grounded
-  explanation: Why: The customer already holds checking, savings, and a credit card, and has been with the bank for 2.1 years in the affluent segment, so a money market account could give them a higher-balance place to keep savings that still stays within the banking relationship. It is a natural next step to discuss for someone who is already consolidating their finances here.
+- product: auto_loan  failed: opener
+  explanation: Why: The customer already holds a checking account and a personal loan with the bank and has been a customer for about five months, so an auto loan would add to an existing relationship.
+Opener: "How has your experience been with us so far, and is there anything else you'd like to talk through today?"
+  judge (opener): The guideline requires the response to include exactly one natural, non-pushy question that a banker could ask the customer. The response has a 'Why' explanation and an 'Opener' line. The Opener is: "How has your experience been with us so far, and is there anything else you'd like to talk through t
 
-Opener: "Have you had a chance to
-  judge (grounded): The guideline says the response may only state facts that appear in the customer facts and must not invent numbers, rates, fees, promotions, life events, or other details. The customer facts are: holds a checking account, a savings account, and a credit card; has been a customer for 2.1 years; is in
-
-- product: credit_card  failed: grounded
-  explanation: Why: The customer has viewed the credit card page twice online in the last 90 days, has held checking and savings with us for 5.7 years, and already manages a personal loan, so they are familiar with our credit products but have no card with us yet. A card could fit naturally alongside their existing checking relationship.
-
-Opener: "I noticed you've been looking at our credit card information rece
-  judge (grounded): The guideline requires that the response only states facts found in the customer facts and invents no details. The customer facts are: viewed the credit card page 2 times online in the last 90 days; holds checking, savings and a personal loan; banks with us for checking but has no card with us; cust
-
-MLflow run: ca04e5e25e694ac0b11068ba337ab3c8
+MLflow run: e6ba9eadda6e4cf096dd486fc68f3470

@@ -1,0 +1,73 @@
+# Evidence 11: LLM judge on banker explanations
+# Captured 2026-11-19T18:13:24Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+
+Job 'c360_ml' run 190925275649301: SUCCESS, started 2026-11-19T18:03:03Z, 9.9 min. Tasks: explanations=SUCCESS, eval_protocol=DISABLED, clv_assumptions=DISABLED, genai_judge=SUCCESS, train_and_score=DISABLED
+
+Protocol: EVAL_PROTOCOL.md (GenAI section), committed 2026-11-19 before the judge first ran.
+
+## Verdict
+{
+  "grounded_bar": 0.95,
+  "grounded_met": true,
+  "all_checks_bar": 0.9,
+  "all_checks_met": false,
+  "claim": "explanations do NOT meet the protocol bar"
+}
+
+## Pass rates
+{
+  "sample": 200,
+  "generator": "databricks-claude-haiku-5-5",
+  "judge": "databricks-claude-sonnet-5-5",
+  "pass_rates": {
+    "grounded": 0.97,
+    "relevant": 0.735,
+    "opener": 0.97
+  },
+  "all_checks_pass_rate": 0.675
+}
+
+## Examples of failures with the judge's rationale
+
+- product: heloc  failed: relevant
+  explanation: Why: The customer holds a checking account and has been with the bank for 1.4 years in the mass segment, so a conversation about a home equity line of credit is a reasonable next step to discuss.
+Opener: "How has your experience banking with us been so far?"
+  judge (relevant): The guideline requires the response to explain why the recommended product (HELOC) fits this particular customer. The response has a 'Why' section that cites the customer's checking account, 1.4-year tenure, and mass segment, then says a HELOC conversation is 'a reasonable next step.' It never links
+
+- product: heloc  failed: relevant
+  explanation: Why: The customer viewed the home equity line of credit page once in the last 90 days, and has held a checking account and been a customer for 0.8 years.
+Opener: "Did anything in particular catch your attention when you looked at the home equity line of credit information online?"
+  judge (relevant): The guideline requires the response to explain why the recommended product (HELOC) fits this particular customer. The response has a 'Why' section that lists customer facts: one view of the HELOC page in the last 90 days, a checking account, and 0.8 years as a customer. These facts are specific to t
+
+- product: cd  failed: grounded
+  explanation: Why: The customer viewed the certificate of deposit page 4 times and started an online application for one in the last 90 days. They have held a checking account, savings account, and auto loan for 1.1 years.
+
+Opener: "I noticed you've been looking at our certificate of deposit online recently. Would you like to talk through how it works?"
+  judge (grounded): The guideline says the response may only state facts that appear in the customer facts and must not invent details. The customer facts are: 4 views of the CD page in the last 90 days, a started online CD application in the last 90 days, current holdings of a checking account, savings account, and au
+
+- product: heloc  failed: relevant
+  explanation: Why: The customer holds a checking account, a certificate of deposit, and an auto loan, and joined the bank within the last month, so a home equity line of credit is worth discussing as an additional product.
+Opener: "How has your experience with us been so far?"
+  judge (relevant): The guideline requires the response to explain why the recommended product (HELOC) fits this particular customer. The response has a 'Why' section that lists the customer's holdings (checking, CD, auto loan) and says they joined within the last month, then concludes that a HELOC is 'worth discussing
+
+- product: personal_loan  failed: relevant
+  explanation: Why: The customer viewed the personal loan page once in the last 90 days, holds checking and savings accounts, and has been a customer for 2.6 years in the mass affluent segment.
+Opener: "I noticed you looked at our personal loan page recently. Was there anything about it you wanted to understand better?"
+  judge (relevant): The guideline requires the response to explain why the recommended product fits this particular customer. The response has a 'Why' section that lists the customer's facts: one view of the personal loan page in the last 90 days, a checking and a savings account, 2.6 years as a customer, and the mass 
+
+- product: personal_loan  failed: relevant
+  explanation: Why: The customer viewed the personal loan page once online in the last 90 days, so the product is a natural topic to raise. They currently hold a checking account, have been a customer for 0.3 years, and are in the mass affluent segment.
+Opener: "I noticed you looked at our personal loan information recently. Was there anything about it you wanted to understand better?"
+  judge (relevant): The guideline requires the response to explain why the recommended product fits this particular customer. The response has a 'Why' section that cites the customer's specific facts: one view of the personal loan page in the last 90 days, a checking account, 0.3 years of tenure, and the mass affluent 
+
+- product: auto_loan  failed: relevant
+  explanation: Why: The customer has held checking, savings, and a credit card with the bank for 1.9 years, and the auto loan is the product being raised in that existing relationship.
+Opener: "How have things been going with your checking, savings, and credit card since you've been with us?"
+  judge (relevant): The guideline requires the response to explain why the recommended product (auto_loan) fits this particular customer. The response has a 'Why' section that cites the customer's holdings (checking, savings, credit card) and 1.9-year tenure. However, it only says the auto loan is 'the product being ra
+
+- product: auto_loan  failed: opener
+  explanation: Why: The customer already holds a checking account and a personal loan with the bank and has been a customer for about five months, so an auto loan would add to an existing relationship.
+Opener: "How has your experience been with us so far, and is there anything else you'd like to talk through today?"
+  judge (opener): The guideline requires the response to include exactly one natural, non-pushy question that a banker could ask the customer. The response has a 'Why' explanation and an 'Opener' line. The Opener is: "How has your experience been with us so far, and is there anything else you'd like to talk through t
+
+MLflow run: e6ba9eadda6e4cf096dd486fc68f3470

@@ -23,7 +23,11 @@ prompts AS (
     'Reply in exactly this format and nothing else:\n',
     'Why: <one or two sentences to the banker explaining why this product fits; refer to the person as "the customer">\n',
     'Opener: "<one natural, non-pushy question the banker could ask the customer>"\n',
-    'Do not use the customer''s name. Do not mention models, scores, probabilities or lifetime value.') AS prompt
+    'Do not use the customer''s name. Do not mention models, scores, probabilities or lifetime value. ',
+    'Do not infer or suggest anything that is not in the facts: nothing about creditworthiness, managing credit well, ',
+    'income, capacity to borrow, financial needs, goals, home ownership plans or life events. ',
+    'If the facts are few, write a shorter reason that only restates them; do not fill gaps. ',
+    'The opener is exactly one question.') AS prompt
   FROM top1
 ),
 gen AS (
