@@ -10,6 +10,8 @@ APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
 at = AppTest.from_file(APP, default_timeout=120).run()
 assert not at.exception, at.exception
 book_rows = at.dataframe[0].value.shape[0]
+charts = at.get("vega_lite_chart")
+product_chart_rendered = len(charts) == 1
 at.sidebar.radio[0].set_value("Customer 360").run()
 sel = at.selectbox(key="customer_select")
 opts = sel.options
@@ -39,10 +41,10 @@ row_click_opens_profile = (at2.selectbox(key="customer_select").value == book_fi
                            and any(book_first_id in c.value for c in at2.caption))
 at2.button[0].click().run()
 back_returns_to_book = at2.session_state["page"] == "My book" and len(at2.dataframe) > 0
-ok = (after_select == target == after_rerun and header_ok and all(picks) and not at.exception
+ok = (product_chart_rendered and after_select == target == after_rerun and header_ok and all(picks) and not at.exception
       and row_click_opens_profile and back_returns_to_book and not at2.exception)
 print(json.dumps({"step": "app_test", "status": "ok" if ok else "failed", "my_book_rows": book_rows,
-                  "customer_options": len(opts), "first_customer_selected_by_default": True,
+                  "customer_options": len(opts), "product_chart_rendered": product_chart_rendered, "first_customer_selected_by_default": True,
                   "picked_4th_customer_kept_after_select": after_select == target,
                   "detail_header_matches_pick": header_ok,
                   "kept_after_rerun": after_select == after_rerun, "five_more_picks_kept": picks, "row_click_opens_profile": row_click_opens_profile, "back_returns_to_book": back_returns_to_book,

@@ -10,6 +10,7 @@ return only that banker's branches. All data is synthetic.
 import os
 import time
 
+import altair as alt
 import pandas as pd
 import psycopg
 import streamlit as st
@@ -109,13 +110,34 @@ if page == "My book":
     col1.metric("Customers with a recommendation", f"{len(book):,}")
     col2.metric("Expected CLV uplift (sum)", money(book["expected_clv_uplift"].sum()))
     col3.metric("Outcomes recorded", int(book["last_outcome"].notna().sum()))
-    f1, f2 = st.columns(2)
-    pick_branch = f1.multiselect("Branch", branches, default=branches)
-    pick_prod = f2.multiselect("Product", sorted(book["product"].unique()),
-                               format_func=lambda p: PRODUCT_NAMES.get(p, p))
-    view = book[book["branch"].isin(pick_branch)]
-    if pick_prod:
-        view = view[view["product"].isin(pick_prod)]
+    pick_branch = st.multiselect("Branch", branches, default=branches)
+    in_branch = book[book["branch"].isin(pick_branch)]
+
+    # Next best product, ranked: click a bar to filter the table (shift-click for several,
+    # click the background to clear). One hue; unselected bars fade to gray.
+    counts = (in_branch.groupby("product")
+              .agg(customers=("customer_360_id", "count"), expected_uplift=("expected_clv_uplift", "sum"))
+              .reset_index())
+    counts["product_name"] = counts["product"].map(PRODUCT_NAMES)
+    counts["uplift_label"] = counts["expected_uplift"].map(money)
+    pick = alt.selection_point(name="product_pick", fields=["product"], toggle="event.shiftKey")
+    base = alt.Chart(counts).encode(
+        y=alt.Y("product_name:N", sort="-x", title=None, axis=alt.Axis(ticks=False, domain=False, labelPadding=8)),
+        x=alt.X("customers:Q", title="Customers with this as their next best product",
+                axis=alt.Axis(grid=True, gridOpacity=0.15, domain=False, ticks=False, tickCount=4)))
+    bars = base.mark_bar(size=18, cornerRadiusEnd=4).encode(
+        color=alt.condition(pick, alt.value("#2a78d6"), alt.value("#c9c8c3")),
+        tooltip=[alt.Tooltip("product_name:N", title="Product"), alt.Tooltip("customers:Q", title="Customers"),
+                 alt.Tooltip("uplift_label:N", title="Expected CLV uplift")],
+    ).add_params(pick)
+    labels = base.mark_text(align="left", dx=6, fontSize=12).encode(text="customers:Q")
+    st.markdown("**Next best product in my book**")
+    event = st.altair_chart((bars + labels).properties(height=34 * max(len(counts), 1)),
+                            on_select="rerun", key="product_chart", width="stretch")
+    pick_prod = [p["product"] for p in (event.selection.get("product_pick") or []) if "product" in p]
+    st.caption("Click a bar to filter the table; shift-click to add products; click the background to clear."
+               + (f" Showing: {', '.join(PRODUCT_NAMES.get(p, p) for p in pick_prod)}." if pick_prod else ""))
+    view = in_branch[in_branch["product"].isin(pick_prod)] if pick_prod else in_branch
     view = view.assign(product=view["product"].map(PRODUCT_NAMES),
                        likelihood=(view["propensity"] * 100).round(1).astype(str) + "%",
                        expected_clv_uplift=view["expected_clv_uplift"].map(money),
