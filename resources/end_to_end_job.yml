@@ -1,0 +1,87 @@
+resources:
+  jobs:
+    c360_end_to_end:
+      name: c360_end_to_end
+      description: End-to-end build, started when an end-of-day drop lands (file arrival on raw/_landing). Pipeline, governance, ML and GenAI, Lakebase serving, then the protocol checks.
+      trigger:
+        pause_status: UNPAUSED
+        file_arrival:
+          url: /Volumes/${var.catalog}/${var.schema}/${resources.volumes.raw.name}/_landing/
+          min_time_between_triggers_seconds: 300
+      max_concurrent_runs: 1
+      tasks:
+        - task_key: access_policies
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file: {path: ../src/governance/01_access_policies.sql, source: WORKSPACE}
+        - task_key: refresh_pipeline
+          depends_on: [{task_key: access_policies}]
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.c360_pipeline.id}
+        - task_key: pii_tags
+          depends_on: [{task_key: refresh_pipeline}]
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file: {path: ../src/governance/02_pii_tags.sql, source: WORKSPACE}
+        - task_key: clv_assumptions
+          depends_on: [{task_key: refresh_pipeline}]
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file: {path: ../src/ai/01_clv_assumptions.sql, source: WORKSPACE}
+        - task_key: train_and_score
+          depends_on: [{task_key: clv_assumptions}]
+          environment_key: ml
+          spark_python_task:
+            python_file: ../src/ai/02_train_and_score.py
+            parameters: [--catalog, "${var.catalog}", --schema, "${var.schema}", --as-of, "2026-10-31",
+                         --horizon-days, "60", --experiment, "${resources.experiments.cross_sell.name}"]
+        - task_key: explanations
+          depends_on: [{task_key: train_and_score}]
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file: {path: ../src/ai/03_explanations.sql, source: WORKSPACE}
+        - task_key: serving_tables
+          depends_on: [{task_key: explanations}, {task_key: pii_tags}]
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file: {path: ../src/serve/01_serving_tables.sql, source: WORKSPACE}
+        - task_key: refresh_synced_tables
+          depends_on: [{task_key: serving_tables}]
+          environment_key: serve
+          spark_python_task:
+            python_file: ../src/serve/refresh_synced_tables.py
+            parameters:
+              - --tables
+              - ${var.catalog}.serving.pg_customer_360,${var.catalog}.serving.pg_product_holdings,${var.catalog}.serving.pg_recommendations,${var.catalog}.serving.pg_banker_assignments
+        - task_key: postgres_setup
+          depends_on: [{task_key: refresh_synced_tables}]
+          environment_key: serve
+          spark_python_task:
+            python_file: ../src/serve/postgres_setup.py
+            parameters: [--sql-file, "${workspace.file_path}/src/serve/02_postgres_setup.sql",
+                         --app-role, "${resources.apps.c360_banker_app.service_principal_client_id}"]
+        - task_key: eval_protocol
+          depends_on: [{task_key: refresh_pipeline}]
+          environment_key: ml
+          spark_python_task:
+            python_file: ../src/ai/04_eval_protocol.py
+            parameters: [--catalog, "${var.catalog}", --schema, "${var.schema}", --code-dir, "${workspace.file_path}/src/ai",
+                         --experiment, "${resources.experiments.cross_sell.name}"]
+        - task_key: genai_judge
+          depends_on: [{task_key: explanations}]
+          environment_key: judge
+          spark_python_task:
+            python_file: ../src/ai/05_genai_judge.py
+            parameters: [--catalog, "${var.catalog}", --schema, "${var.schema}", --experiment, "${resources.experiments.cross_sell.name}"]
+        - task_key: access_test
+          depends_on: [{task_key: pii_tags}]
+          environment_key: serve
+          spark_python_task:
+            python_file: ../tools/access_test.py
+      environments:
+        - environment_key: ml
+          spec: {client: "2", dependencies: ["mlflow>=2.16", "scikit-learn>=1.4"]}
+        - environment_key: judge
+          spec: {client: "2", dependencies: ["mlflow[databricks]>=3.1"]}
+        - environment_key: serve
+          spec: {client: "2", dependencies: ["psycopg[binary]>=3.1", "databricks-sdk>=0.60", "requests"]}

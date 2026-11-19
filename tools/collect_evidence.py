@@ -151,9 +151,9 @@ def lakebase(p, jobs):
         body += f"## Task stdout: JSON summary ({task})\n" + json.dumps(task_summary(p, run, task), indent=2) + "\n\n"
     synced = []
     for t in ("pg_customer_360", "pg_product_holdings", "pg_recommendations", "pg_banker_assignments"):
-        d = cli(p, "postgres", "get-synced-table", f"synced_tables/c360_bank.customer_lifetime_value.{t}")
+        d = cli(p, "postgres", "get-synced-table", f"synced_tables/c360_bank.serving.{t}")
         st = d.get("status", {})
-        synced.append(f"{t}  source=c360_bank.customer_lifetime_value.{t.replace('pg_', 'serving_')} (resources/lakebase.yml)  "
+        synced.append(f"{t}  source=c360_bank.serving.{t.replace('pg_', 'serving_')} (resources/lakebase.yml)  "
                       f"state={st.get('detailed_state')}")
     body += "## Synced tables (UC -> Lakebase, SNAPSHOT)\n" + "\n".join(synced) + "\n\n"
     fb = latest_success(p, jobs["c360_feedback_sync"])

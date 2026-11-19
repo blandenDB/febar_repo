@@ -361,9 +361,12 @@ def plant_duplicates(rng, df, rate):
 
 # ---------------------------------------------------------------- output
 def write(df, folder, name, fmt):
+    """One file per end-of-day drop, named with the as-of date. Rerunning the same drop
+    rewrites the same name (Auto Loader skips it: idempotent); a new as-of date is a new
+    file that Auto Loader ingests incrementally."""
     shutil.rmtree(folder, ignore_errors=True)
     os.makedirs(folder, exist_ok=True)
-    fname = f"{name}.{'csv' if fmt == 'csv' else 'json'}"
+    fname = f"{name}_{AS_OF:%Y%m%d}.{'csv' if fmt == 'csv' else 'json'}"
     with tempfile.TemporaryDirectory() as tmp:
         local = os.path.join(tmp, fname)
         if fmt == "csv":
@@ -518,7 +521,15 @@ def main():
     with open(f"{t}/manifest/manifest.json", "w") as f:
         json.dump(manifest, f, indent=2)
 
-    summary = {"step": "generate_raw_data", "status": "ok", "seed": a.seed,
+    # Landing marker, written last: a new file here starts the end-to-end job (file arrival trigger).
+    landing = f"{r}/_landing"
+    os.makedirs(landing, exist_ok=True)
+    stamp = pd.Timestamp.now(tz="UTC").strftime("%Y%m%dT%H%M%SZ")
+    marker = f"{landing}/drop_{AS_OF:%Y%m%d}_{stamp}.json"
+    with open(marker, "w") as f:
+        json.dump({"as_of": str(AS_OF.date()), "written_at": stamp, "raw_rows": rows}, f)
+
+    summary = {"step": "generate_raw_data", "status": "ok", "seed": a.seed, "landing_marker": os.path.basename(marker),
                "people": n, "raw_rows": rows, "total_raw_rows": int(sum(rows.values())),
                "planted_issues": planted, "identity_rows": int(len(truth))}
     print(json.dumps(summary))

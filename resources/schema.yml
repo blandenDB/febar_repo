@@ -4,6 +4,14 @@ resources:
       catalog_name: ${var.catalog}
       name: ${var.schema}
       comment: FE Bar customer 360 and lifetime value build (synthetic data only)
+    pipeline_ops:
+      catalog_name: ${var.catalog}
+      name: pipeline_ops
+      comment: Operational tables for pipelines (event logs); not business data
+    serving:
+      catalog_name: ${var.catalog}
+      name: serving
+      comment: Owner-only serving copies, Lakebase synced tables and their sync logs; app access is enforced in Postgres
 
   volumes:
     raw:

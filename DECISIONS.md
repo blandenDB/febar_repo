@@ -167,3 +167,10 @@ Reconfirmed from earlier entries (unchanged): ingestion with Auto Loader from fi
 - **Decision:** give the explanation model richer, true facts (balances, card spend, digital logins, product count, a similar-customers rate) and keep the strict prompt; re-run the same judge on the same sample.
 - **Options considered:** richer facts and run 3; report runs 1 and 2 as misses; explain only recommendations with a browsing signal.
 - **Why:** [REWRITE IN YOUR WORDS]
+
+## 2026-11-19: Serving layer in its own schema [REWRITE IN YOUR WORDS]
+
+- **Decision:** move the owner-only serving copies (serving_*), the Lakebase synced tables (pg_*) and their sync event logs to c360_bank.serving. The business schema keeps pipeline, gold, governance and ML tables; pipeline event logs go to c360_bank.pipeline_ops.
+- **Options considered:** move the serving layer; leave 4 sync event logs in the business schema and document it.
+- **Context:** Lakebase sync pipelines always write their event logs into the synced table's schema, whatever storage schema is set.
+- **Why:** [REWRITE IN YOUR WORDS]

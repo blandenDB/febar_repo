@@ -10,42 +10,42 @@ resources:
 
   postgres_synced_tables:
     pg_customer_360:
-      synced_table_id: ${var.catalog}.${var.schema}.pg_customer_360
-      source_table_full_name: ${var.catalog}.${var.schema}.serving_customer_360
+      synced_table_id: ${var.catalog}.${resources.schemas.serving.name}.pg_customer_360
+      source_table_full_name: ${var.catalog}.${resources.schemas.serving.name}.serving_customer_360
       branch: projects/c360-serving/branches/production
       postgres_database: c360
       primary_key_columns: [customer_360_id]
       scheduling_policy: SNAPSHOT
       new_pipeline_spec:
         storage_catalog: ${var.catalog}
-        storage_schema: ${var.schema}
+        storage_schema: ${resources.schemas.serving.name}
     pg_product_holdings:
-      synced_table_id: ${var.catalog}.${var.schema}.pg_product_holdings
-      source_table_full_name: ${var.catalog}.${var.schema}.serving_product_holdings
+      synced_table_id: ${var.catalog}.${resources.schemas.serving.name}.pg_product_holdings
+      source_table_full_name: ${var.catalog}.${resources.schemas.serving.name}.serving_product_holdings
       branch: projects/c360-serving/branches/production
       postgres_database: c360
       primary_key_columns: [account_id]
       scheduling_policy: SNAPSHOT
       new_pipeline_spec:
         storage_catalog: ${var.catalog}
-        storage_schema: ${var.schema}
+        storage_schema: ${resources.schemas.serving.name}
     pg_recommendations:
-      synced_table_id: ${var.catalog}.${var.schema}.pg_recommendations
-      source_table_full_name: ${var.catalog}.${var.schema}.serving_recommendations
+      synced_table_id: ${var.catalog}.${resources.schemas.serving.name}.pg_recommendations
+      source_table_full_name: ${var.catalog}.${resources.schemas.serving.name}.serving_recommendations
       branch: projects/c360-serving/branches/production
       postgres_database: c360
       primary_key_columns: [recommendation_id]
       scheduling_policy: SNAPSHOT
       new_pipeline_spec:
         storage_catalog: ${var.catalog}
-        storage_schema: ${var.schema}
+        storage_schema: ${resources.schemas.serving.name}
     pg_banker_assignments:
-      synced_table_id: ${var.catalog}.${var.schema}.pg_banker_assignments
-      source_table_full_name: ${var.catalog}.${var.schema}.serving_banker_assignments
+      synced_table_id: ${var.catalog}.${resources.schemas.serving.name}.pg_banker_assignments
+      source_table_full_name: ${var.catalog}.${resources.schemas.serving.name}.serving_banker_assignments
       branch: projects/c360-serving/branches/production
       postgres_database: c360
       primary_key_columns: [banker_principal]
       scheduling_policy: SNAPSHOT
       new_pipeline_spec:
         storage_catalog: ${var.catalog}
-        storage_schema: ${var.schema}
+        storage_schema: ${resources.schemas.serving.name}

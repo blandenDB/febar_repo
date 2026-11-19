@@ -20,7 +20,7 @@ WHEN MATCHED THEN UPDATE SET branch_ids = ARRAY('BR001', 'BR002'), updated_at = 
 WHEN NOT MATCHED THEN INSERT (banker_principal, branch_ids, updated_at)
   VALUES (s.banker_principal, ARRAY('BR001', 'BR002'), current_timestamp());
 
-CREATE OR REPLACE TABLE c360_bank.customer_lifetime_value.serving_customer_360
+CREATE OR REPLACE TABLE c360_bank.serving.serving_customer_360
 COMMENT 'Owner-only serving copy of gold_customer_360 for Lakebase sync (access enforced by Postgres RLS)'
 TBLPROPERTIES ('delta.enableChangeDataFeed' = 'true')
 AS SELECT customer_360_id, first_name, last_name, email, city, state, zip, age, segment, home_branch_id,
@@ -34,7 +34,7 @@ AS SELECT customer_360_id, first_name, last_name, email, city, state, zip, age, 
    FROM c360_bank.customer_lifetime_value.gold_customer_360
    WHERE home_branch_id IS NOT NULL;
 
-CREATE OR REPLACE TABLE c360_bank.customer_lifetime_value.serving_product_holdings
+CREATE OR REPLACE TABLE c360_bank.serving.serving_product_holdings
 COMMENT 'Owner-only serving copy of gold_product_holdings for Lakebase sync (access enforced by Postgres RLS)'
 TBLPROPERTIES ('delta.enableChangeDataFeed' = 'true')
 AS SELECT account_id, customer_360_id, home_branch_id, source_system, product, product_variant, open_date,
@@ -43,7 +43,7 @@ AS SELECT account_id, customer_360_id, home_branch_id, source_system, product, p
    FROM c360_bank.customer_lifetime_value.gold_product_holdings
    WHERE home_branch_id IS NOT NULL;
 
-CREATE OR REPLACE TABLE c360_bank.customer_lifetime_value.serving_recommendations
+CREATE OR REPLACE TABLE c360_bank.serving.serving_recommendations
 COMMENT 'Owner-only serving copy of recommendations plus the #1 explanation, for Lakebase sync (access enforced by Postgres RLS)'
 TBLPROPERTIES ('delta.enableChangeDataFeed' = 'true')
 AS SELECT CONCAT(r.customer_360_id, '-', r.recommendation_rank) AS recommendation_id,
@@ -55,12 +55,12 @@ AS SELECT CONCAT(r.customer_360_id, '-', r.recommendation_rank) AS recommendatio
      ON e.customer_360_id = r.customer_360_id AND r.recommendation_rank = 1
    WHERE r.home_branch_id IS NOT NULL;
 
-CREATE OR REPLACE TABLE c360_bank.customer_lifetime_value.serving_banker_assignments
+CREATE OR REPLACE TABLE c360_bank.serving.serving_banker_assignments
 COMMENT 'Owner-only serving copy of c360_banker_assignments for Lakebase sync (drives Postgres RLS)'
 TBLPROPERTIES ('delta.enableChangeDataFeed' = 'true')
 AS SELECT banker_principal, branch_ids FROM c360_bank.customer_lifetime_value.c360_banker_assignments;
 
-ALTER TABLE c360_bank.customer_lifetime_value.serving_customer_360 SET TAGS ('data_classification' = 'pii');
-ALTER TABLE c360_bank.customer_lifetime_value.serving_customer_360 ALTER COLUMN first_name SET TAGS ('c360_pii_type' = 'name');
-ALTER TABLE c360_bank.customer_lifetime_value.serving_customer_360 ALTER COLUMN last_name SET TAGS ('c360_pii_type' = 'name');
-ALTER TABLE c360_bank.customer_lifetime_value.serving_customer_360 ALTER COLUMN email SET TAGS ('c360_pii_type' = 'email');
+ALTER TABLE c360_bank.serving.serving_customer_360 SET TAGS ('data_classification' = 'pii');
+ALTER TABLE c360_bank.serving.serving_customer_360 ALTER COLUMN first_name SET TAGS ('c360_pii_type' = 'name');
+ALTER TABLE c360_bank.serving.serving_customer_360 ALTER COLUMN last_name SET TAGS ('c360_pii_type' = 'name');
+ALTER TABLE c360_bank.serving.serving_customer_360 ALTER COLUMN email SET TAGS ('c360_pii_type' = 'email');

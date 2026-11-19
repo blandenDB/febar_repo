@@ -6,6 +6,10 @@ resources:
       schema: ${resources.schemas.customer_lifetime_value.name}
       serverless: true
       channel: CURRENT
+      event_log:
+        catalog: ${var.catalog}
+        schema: ${resources.schemas.pipeline_ops.name}
+        name: c360_pipeline_event_log
       configuration:
         raw_root: /Volumes/${var.catalog}/${var.schema}/${resources.volumes.raw.name}
         as_of_date: "2026-10-31"

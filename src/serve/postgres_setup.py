@@ -49,7 +49,7 @@ def main():
         cur.execute(f"GRANT {test_role} TO CURRENT_USER")
         cur.execute(APP_GRANTS.format(role=test_role))
         try:
-            cur.execute("SELECT count(*) FROM customer_lifetime_value.pg_customer_360")
+            cur.execute("SELECT count(*) FROM serving.pg_customer_360")
             total = cur.fetchone()[0]
             checks = {"synced_customers_total": total}
             cur.execute(f"SET ROLE {test_role}")
@@ -66,7 +66,7 @@ def main():
                 cur.execute("ROLLBACK")
             # Direct access to synced base tables must be denied for the app's role.
             try:
-                cur.execute("SELECT 1 FROM customer_lifetime_value.pg_customer_360 LIMIT 1")
+                cur.execute("SELECT 1 FROM serving.pg_customer_360 LIMIT 1")
                 checks["base_table_access"] = "ALLOWED (unexpected)"
             except psycopg.errors.InsufficientPrivilege:
                 checks["base_table_access"] = "denied"

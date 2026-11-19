@@ -62,14 +62,14 @@ def fmt(d):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--profile", required=True)
+    ap.add_argument("--profile", default="", help="CLI profile; omit when running as a job task")
     ap.add_argument("--warehouse", default="7252b2dd64dc2427")
     a = ap.parse_args()
-    w = WorkspaceClient(profile=a.profile)
+    w = WorkspaceClient(profile=a.profile) if a.profile else WorkspaceClient()
     host = w.config.host.rstrip("/")
     sp = next(iter(w.service_principals.list(filter=f'displayName eq "{SP_NAME}"')))
     app_id = sp.application_id
-    owner_token = w.config.authenticate()["Authorization"].split(" ", 1)[1]
+    owner_token = w.config.authenticate()["Authorization"].split(" ", 1)[1]  # in memory only
 
     def as_owner(sql):
         d = run_sql(host, owner_token, a.warehouse, sql)
@@ -77,6 +77,7 @@ def main():
         return d
 
     is_admin = any(g.display == "admins" for g in (sp.groups or []))
+    print('{"step": "access_test", "status": "starting"}')
     print("# Evidence 12: access test with a real non-admin identity")
     print(f"# Captured {dt.datetime.now(dt.timezone.utc):%Y-%m-%dT%H:%M:%SZ} by tools/access_test.py. Synthetic data; user identities redacted.")
     print(f"\nPrincipal: service principal '{SP_NAME}' (application ID {app_id}); workspace admin: {is_admin}; "

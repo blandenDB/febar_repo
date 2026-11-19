@@ -18,7 +18,7 @@ resources:
             python_file: ../src/serve/refresh_synced_tables.py
             parameters:
               - --tables
-              - ${var.catalog}.${var.schema}.pg_customer_360,${var.catalog}.${var.schema}.pg_product_holdings,${var.catalog}.${var.schema}.pg_recommendations,${var.catalog}.${var.schema}.pg_banker_assignments
+              - ${var.catalog}.serving.pg_customer_360,${var.catalog}.serving.pg_product_holdings,${var.catalog}.serving.pg_recommendations,${var.catalog}.serving.pg_banker_assignments
         - task_key: postgres_setup
           depends_on:
             - task_key: refresh_synced_tables

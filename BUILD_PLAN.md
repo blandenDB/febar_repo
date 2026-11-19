@@ -87,7 +87,7 @@ Each stage reads the previous stage's output: remove any one and the next one ha
 
 Supporting: gold_digital_product_interest (one row per customer and product viewed), banker_feedback (one row per recorded outcome), c360_access_entitlements, c360_banker_assignments, clv_product_assumptions, clv_parameters, serving_* (owner-only copies for sync).
 
-**Cleanup (to do):** the synced-table pipelines currently store their event logs and staging tables in the same schema. Move them to a separate schema `c360_bank.sync_staging` so the business schema shows only business tables.
+**Schemas (changed 2026-11-19, see DECISIONS.md):** `customer_lifetime_value` holds only business tables (bronze, silver, gold, governance, ML; 30 tables). `serving` holds the owner-only serving copies, the Lakebase synced tables (Postgres schema `serving`) and their sync event logs, because sync pipelines always log into the synced table's schema. `pipeline_ops` holds the main pipeline's event log. Lakeflow's internal `__materialization_*` tables stay with the pipeline; they cannot be moved.
 
 ## 4. Bundle layout
 
@@ -95,7 +95,7 @@ Supporting: gold_digital_product_interest (one row per customer and product view
 
 | File | Resources |
 |---|---|
-| resources/schema.yml | schema, volumes `raw` and `ground_truth` |
+| resources/schema.yml | schemas `customer_lifetime_value`, `serving`, `pipeline_ops`; volumes `raw` and `ground_truth` |
 | resources/data_job.yml | job c360_generate_raw_data (simulates the source systems landing files) |
 | resources/pipeline.yml | pipeline c360_lakeflow_pipeline |
 | resources/build_job.yml | job c360_build (policies, pipeline, tags); folded into c360_end_to_end (to do) |
@@ -134,4 +134,4 @@ Task order:
 | Orchestration job and evidence collection | 0.75 |
 | **Total** | **8.0** |
 
-Remaining work to finish this plan: out-of-time evaluation, LLM judge, non-admin access test, the end-to-end job with file arrival trigger, sync staging schema cleanup, and refreshing `evidence/00_setup.txt`. About 3 hours.
+Remaining work to finish this plan (2026-11-19 update): out-of-time evaluation, LLM judge, non-admin access test and the schema cleanup are done; the end-to-end job is deployed with its file arrival trigger and needs its first triggered run; then refresh all evidence, including `evidence/00_setup.txt`.
