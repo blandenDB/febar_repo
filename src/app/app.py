@@ -33,6 +33,19 @@ ACTIONS = {"accepted": "Accepted", "follow_up": "Follow up later", "not_interest
 
 st.set_page_config(page_title="Customer 360: next best product", layout="wide")
 
+# Every widget sits in a keyed container ("w_*"); this draws a 2pt black border around each,
+# and around the outcome form.
+st.markdown("""<style>
+div[class*="st-key-w_"], div[data-testid="stForm"] {
+  border: 2pt solid #000000 !important; border-radius: 8px; padding: 12px 14px;
+}
+</style>""", unsafe_allow_html=True)
+
+
+def box(name):
+    """A bordered container for one widget."""
+    return st.container(key=f"w_{name}")
+
 
 @st.cache_resource
 def workspace():
@@ -113,9 +126,12 @@ if page == "My book":
         WHERE r.recommendation_rank = 1
         ORDER BY r.expected_clv_uplift DESC, c.customer_360_id""")
     col1, col2, col3 = st.columns(3)
-    col1.metric("Customers with a recommendation", f"{len(book):,}")
-    col2.metric("Expected CLV uplift (sum)", money(book["expected_clv_uplift"].sum()))
-    col3.metric("Outcomes recorded", int(book["last_outcome"].notna().sum()))
+    with col1, box("book_metric_customers"):
+        st.metric("Customers with a recommendation", f"{len(book):,}")
+    with col2, box("book_metric_uplift"):
+        st.metric("Expected CLV uplift (sum)", money(book["expected_clv_uplift"].sum()))
+    with col3, box("book_metric_outcomes"):
+        st.metric("Outcomes recorded", int(book["last_outcome"].notna().sum()))
     # Branch pie and product columns, cross-filtered: click a slice or a column to filter
     # (shift-click to add), click the background to clear. Selections from the last run
     # are read first so each chart counts only what the other chart has selected.
@@ -167,12 +183,12 @@ if page == "My book":
     bar_labels = bar_base.mark_text(baseline="bottom", dy=-4, fontSize=12).encode(text="customers:Q")
 
     left, right = st.columns([1, 2])
-    with left:
+    with left, box("branch_pie"):
         st.markdown("**Customers by branch**")
         st.altair_chart((pie + pie_labels).properties(height=280).configure_view(strokeWidth=0),
                         on_select="rerun", key="branch_chart",
                         width="stretch")
-    with right:
+    with right, box("product_chart"):
         st.markdown("**Next best product**")
         st.altair_chart((bars + bar_labels).properties(height=280).configure_view(strokeWidth=0),
                         on_select="rerun", key="product_chart",
@@ -194,10 +210,11 @@ if page == "My book":
     st.caption("Click a row to open that customer's 360 profile.")
     view = view.reset_index(drop=True)
     st.session_state["book_ids"] = view["customer_360_id"].tolist()
-    st.dataframe(view[["customer_360_id", "customer", "branch", "segment", "active_products", "product", "likelihood",
-                       "expected_clv_uplift", "clv_uplift_if_adopted", "last_outcome"]],
-                 hide_index=True, width="stretch", key="book_table",
-                 on_select=open_customer_from_book, selection_mode="single-row")
+    with box("book_table"):
+        st.dataframe(view[["customer_360_id", "customer", "branch", "segment", "active_products", "product", "likelihood",
+                           "expected_clv_uplift", "clv_uplift_if_adopted", "last_outcome"]],
+                     hide_index=True, width="stretch", key="book_table",
+                     on_select=open_customer_from_book, selection_mode="single-row")
 
 else:
     st.button("← Back to My book", on_click=back_to_book)
@@ -218,16 +235,19 @@ else:
     st.caption(f"{cust.customer_360_id} | {cust.city}, {cust.state} | branch {cust.home_branch_id} | "
                f"{str(cust.segment).replace('_', ' ')} | customer for {cust.tenure_years} years | age {cust.age}")
     m = st.columns(5)
-    m[0].metric("Active products", int(cust.active_products))
-    m[1].metric("Deposits", money(cust.total_deposit_balance))
-    m[2].metric("Loans", money(cust.total_loan_balance))
-    m[3].metric("Card spend, 12 months", money(cust.card_spend_12m))
-    m[4].metric("Digital events, 90 days", int(cust.digital_events_90d))
+    for col, (name, label, value) in zip(m, [
+            ("products", "Active products", int(cust.active_products)),
+            ("deposits", "Deposits", money(cust.total_deposit_balance)),
+            ("loans", "Loans", money(cust.total_loan_balance)),
+            ("spend", "Card spend, 12 months", money(cust.card_spend_12m)),
+            ("digital", "Digital events, 90 days", int(cust.digital_events_90d))]):
+        with col, box(f"profile_metric_{name}"):
+            st.metric(label, value)
 
     recs = run(banker, "SELECT * FROM app.recommendations WHERE customer_360_id = %s ORDER BY recommendation_rank", (cid,))
     top = recs.iloc[0]
     left, right = st.columns([3, 2])
-    with left:
+    with left, box("recommendation"):
         st.markdown(f"#### Next best product: {PRODUCT_NAMES.get(top['product'], top['product'])}")
         if top["explanation"]:
             for line in str(top["explanation"]).splitlines():
@@ -241,7 +261,7 @@ else:
             for r in recs.iloc[1:].itertuples():
                 st.write(f"- {PRODUCT_NAMES.get(r.product, r.product)}: likelihood {r.propensity:.1%}, "
                          f"expected CLV uplift {money(r.expected_clv_uplift)}")
-    with right:
+    with right, box("holdings"):
         st.markdown("#### Products held")
         hold = run(banker, """SELECT product, product_variant, open_date, balance, status FROM app.holdings
                               WHERE customer_360_id = %s ORDER BY open_date""", (cid,))
@@ -266,4 +286,6 @@ else:
     if not hist.empty:
         hist["product"] = hist["product"].map(PRODUCT_NAMES)
         hist["action"] = hist["action"].map(ACTIONS)
-        st.dataframe(hist, hide_index=True, width="stretch")
+        with box("history"):
+            st.markdown("#### Outcomes recorded")
+            st.dataframe(hist, hide_index=True, width="stretch")
