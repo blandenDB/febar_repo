@@ -14,6 +14,7 @@ import os
 import re
 import subprocess
 
+E2E = "c360_end_to_end"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@databricks\.com")
 
@@ -80,6 +81,9 @@ def main():
     p, wh = a.profile, a.warehouse
     jobs, pipes, exps = bundle_ids(p)
 
+    # 00 setup
+    setup(p, jobs)
+
     # 01 raw data
     run = latest_success(p, jobs["generate_raw_data"])
     write("01_raw_data.txt", "Evidence 01: synthetic raw data generation",
@@ -100,13 +104,13 @@ def main():
             "(silver_* and quarantine_records), so each rule appears twice with the same counts.\n")
 
     # 03 governance
-    run = latest_success(p, jobs["c360_build"])
+    run = latest_success(p, jobs[E2E], task="access_policies")
     write("03_governance.txt", "Evidence 03: Unity Catalog governance (entitlements, column masks, row filters, tags)",
           run_header(run) + "\nMethod: the same queries run while the caller's entitlement is switched between personas, "
           "then restored to data_owner.\n\n" + sql(p, wh, "tools/checks/03_governance.sql"))
 
     # 04 ML
-    run = latest_success(p, jobs["c360_ml"], task="train_and_score")
+    run = latest_success(p, jobs[E2E], task="train_and_score")
     summ = task_summary(p, run, "train_and_score")
     model = summ.get("model")
     versions = subprocess.run(["databricks", "api", "get", f"/api/2.1/unity-catalog/models/{model}/versions",
@@ -127,7 +131,7 @@ def main():
 
     # 05 GenAI
     write("05_genai.txt", "Evidence 05: GenAI banker explanations (databricks-claude-haiku-5-5 via ai_query)",
-          run_header(latest_success(p, jobs["c360_ml"], task="explanations")) + "\n\n" + sql(p, wh, "tools/checks/05_genai.sql")
+          run_header(latest_success(p, jobs[E2E], task="explanations")) + "\n\n" + sql(p, wh, "tools/checks/05_genai.sql")
           + "\nReview note: explanations flagged by mentions_offer_or_rate were read by hand. They say the product "
             "fits 'without relying on any specific rate, fee, or promotion' (echoing the instruction), not an invented offer.\n")
 
@@ -143,9 +147,12 @@ def main():
     # 11 GenAI judge
     genai_judge(p, jobs)
 
+    # 12 Access test (non-admin principal)
+    access_test(p, jobs)
+
 
 def lakebase(p, jobs):
-    run = latest_success(p, jobs["c360_serve"])
+    run = latest_success(p, jobs[E2E], task="postgres_setup")
     body = run_header(run) + "\n\n"
     for task in ("refresh_synced_tables", "postgres_setup"):
         body += f"## Task stdout: JSON summary ({task})\n" + json.dumps(task_summary(p, run, task), indent=2) + "\n\n"
@@ -189,7 +196,7 @@ def genie(p):
 
 
 def eval_protocol(p, jobs):
-    run = latest_success(p, jobs["c360_ml"], task="eval_protocol")
+    run = latest_success(p, jobs[E2E], task="eval_protocol")
     summ = task_summary(p, run, "eval_protocol")
     o, v = summ.get("overall", {}), summ.get("verdict", {})
     body = run_header(run) + "\n\nProtocol: EVAL_PROTOCOL.md, committed 2026-11-19 before this test first ran (git commit fb4993f).\n\n"
@@ -205,7 +212,7 @@ def eval_protocol(p, jobs):
 
 
 def genai_judge(p, jobs):
-    run = latest_success(p, jobs["c360_ml"], task="genai_judge")
+    run = latest_success(p, jobs[E2E], task="genai_judge")
     summ = task_summary(p, run, "genai_judge")
     body = run_header(run) + "\n\nProtocol: EVAL_PROTOCOL.md (GenAI section), committed 2026-11-19 before the judge first ran.\n"
     body += ("\n## History (all runs kept; see EVAL_PROTOCOL.md change notes)\n"
@@ -225,6 +232,31 @@ def genai_judge(p, jobs):
             body += f"  judge ({k}): {v}\n"
     body += f"\nMLflow run: {summ.get('mlflow_run_id')}\n"
     write("11_genai_judge.txt", "Evidence 11: LLM judge on banker explanations", body)
+
+
+def access_test(p, jobs):
+    run = latest_success(p, jobs[E2E], task="access_test")
+    t = next(t for t in run["tasks"] if t["task_key"] == "access_test")
+    logs = cli(p, "jobs", "get-run-output", str(t["run_id"])).get("logs", "")
+    body = logs.split('{"step": "access_test", "status": "starting"}', 1)[-1].strip()
+    write("12_access_test.txt", "Evidence 12: access test with a real non-admin identity",
+          run_header(run) + "\n\n" + "\n".join(l for l in body.splitlines() if not l.startswith("# ")) + "\n")
+
+
+def setup(p, jobs):
+    s = cli(p, "bundle", "summary")
+    lines = [f"Workspace: {s['workspace']['host']}  (bundle {s['bundle']['name']}, target {s['bundle']['target']})", ""]
+    for kind, items in sorted(s["resources"].items()):
+        for key, v in sorted(items.items()):
+            lines.append(f"{kind:24s} {key:32s} id={v.get('id')}")
+    j = cli(p, "jobs", "get", str(jobs[E2E]))["settings"]
+    lines += ["", f"Job {E2E} trigger: " + json.dumps(j.get("trigger")),
+              "Task order: " + ", ".join(f"{t['task_key']}<-[{','.join(d['task_key'] for d in t.get('depends_on', []))}]"
+                                          for t in j["tasks"])]
+    app = cli(p, "apps", "get", "c360-banker")
+    lines += ["", f"App c360-banker: {app.get('app_status', {}).get('state')}, compute {app.get('compute_status', {}).get('state')}"]
+    sch = sql(p, "7252b2dd64dc2427", "tools/checks/00_setup.sql")
+    write("00_setup.txt", "Evidence 00: what is deployed (bundle resources, schemas, trigger)", "\n".join(lines) + "\n\n" + sch)
 
 
 if __name__ == "__main__":

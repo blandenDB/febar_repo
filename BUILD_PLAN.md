@@ -107,7 +107,7 @@ Supporting: gold_digital_product_interest (one row per customer and product view
 
 ## 5. Orchestration (to do)
 
-One Lakeflow Job, **c360_end_to_end**, triggered by **file arrival** on `/Volumes/c360_bank/customer_lifetime_value/raw/_landing/`. The generator writes its data files first and a marker file last, so the job starts only when a full end-of-day drop has landed. Data files get date-stamped names per drop, so Auto Loader picks up each new drop incrementally (it skips files overwritten under the same name).
+One Lakeflow Job, **c360_end_to_end**, on a **daily schedule at 06:00 US Central**, after the end-of-day batch window. (Changed 2026-11-19: a file arrival trigger on `raw/_landing/` was tried first and never evaluated in this workspace; see DECISIONS.md.) The generator still writes its data files first and a marker file last, as a record of each complete drop. Data files get date-stamped names per drop, so Auto Loader picks up each new drop incrementally (it skips files overwritten under the same name).
 
 Task order:
 

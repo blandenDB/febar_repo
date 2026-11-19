@@ -174,3 +174,10 @@ Reconfirmed from earlier entries (unchanged): ingestion with Auto Loader from fi
 - **Options considered:** move the serving layer; leave 4 sync event logs in the business schema and document it.
 - **Context:** Lakebase sync pipelines always write their event logs into the synced table's schema, whatever storage schema is set.
 - **Why:** [REWRITE IN YOUR WORDS]
+
+## 2026-11-19: Trigger changed to a daily schedule [REWRITE IN YOUR WORDS]
+
+- **Decision:** run c360_end_to_end daily at 06:00 US Central, after the end-of-day batch window. This replaces the file arrival trigger chosen earlier today.
+- **Options considered:** one more file-arrival attempt on a dedicated landing volume, then a schedule; a schedule now; keep investigating the file-arrival trigger.
+- **Context:** the file arrival trigger on /Volumes/c360_bank/customer_lifetime_value/raw/_landing/ was configured and unpaused, but the platform never evaluated it (trigger_state stayed empty) and two drop markers written after it went live started no run.
+- **Why:** [REWRITE IN YOUR WORDS]
