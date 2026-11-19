@@ -1,0 +1,355 @@
+{
+  "title": "Customer 360 and Next Best Product: Regional Bank Prototype (starter draft)",
+  "slides": [
+    {
+      "id": "s01-title",
+      "layout": "title",
+      "title": "From 1.5% to 4%: the next best product, for every banker",
+      "subtitle": "A customer 360 and next best product prototype (synthetic data)",
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Open with the outcome the EVP owns, not the technology.",
+        "talk_track": "Today our cross-sell campaigns convert at 1.5%. The goal for the next six months is 4% or more. This is a working prototype of how we get there: one view of each customer, a next best product a banker can trust, and a way to learn what works.",
+        "evidence": [
+          "USE_CASE.md section 1: 1.5% today, 4% or more is the 6-month win"
+        ],
+        "transition": "Let me start with what a banker deals with today.",
+        "likely_question": "Is this real customer data? No. Everything here is synthetic, built to match the bank's systems and scale."
+      }
+    },
+    {
+      "id": "s02-problem",
+      "layout": "content_basic",
+      "title": "Bankers cannot see the customer, so every offer is a guess",
+      "body": "To see what a customer holds: the account lookup portal, then one Power BI dashboard per product line\nAbout 15 minutes to prepare one customer conversation (assumption)\nNo model says what to offer next, so offers go out untargeted\nCross-sell campaign response rate: 1.5%\nThe quarterly C-suite dashboard shows what was adopted, not who to offer what, or why it worked",
+      "bullets": true,
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Make the CDO recognise their own bank.",
+        "talk_track": "Our relationship bankers have the data, it is just scattered. Four systems, end-of-day batch, and a dashboard for every product line. When a banker sits down with a customer, they piece the picture together by hand, and nothing tells them which product fits next. That is why 1.5% is where we are.",
+        "evidence": [
+          "USE_CASE.md section 2",
+          "15 minutes is an assumption to confirm with the bank"
+        ],
+        "transition": "Why does this have to change this year?",
+        "likely_question": "Where does 15 minutes come from? It is our estimate; we would measure it in the pilot."
+      }
+    },
+    {
+      "id": "s03-why-now",
+      "layout": "content_3col",
+      "title": "Why now",
+      "columns": [
+        "Beyond dashboards",
+        "Leadership wants prediction and plain-language answers, not another report",
+        "Deeper relationships",
+        "Customers with more products stay longer; competition for deposits is rising",
+        "Governed targeting",
+        "Every offer must be explainable and every customer view controlled by role"
+      ],
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Urgency in the bank's terms. Verify the two market points before presenting (see the CHECK items in USE_CASE.md section 3).",
+        "talk_track": "Three things make this a this-year problem. Our own leadership has asked to move past descriptive reporting. Every bank is competing harder for deposits, and multi-product customers are the ones who stay. And any targeting we do has to stand up to fair-lending and governance review, so it has to be explainable from day one.",
+        "evidence": [
+          "USE_CASE.md section 3",
+          "Market and regulatory points are marked CHECK and need a current source"
+        ],
+        "transition": "Here is what changes.",
+        "likely_question": "Which regulations specifically? Confirm with the bank's compliance team; we designed for explainability and role-based access either way."
+      }
+    },
+    {
+      "id": "s04-today-tomorrow",
+      "layout": "title_only",
+      "title": "Today versus tomorrow",
+      "table": {
+        "data": [
+          [
+            "Area",
+            "Today",
+            "Tomorrow"
+          ],
+          [
+            "Customer view",
+            "Portal lookups plus up to four product dashboards",
+            "One customer 360 across core banking, loans, cards and digital"
+          ],
+          [
+            "What to offer",
+            "No model; untargeted offers",
+            "Next best product ranked by expected CLV uplift, with a reason and an opening question"
+          ],
+          [
+            "New questions",
+            "A new dashboard per question; quarterly totals",
+            "Analysts ask in plain language and get governed answers in seconds"
+          ],
+          [
+            "Learning what works",
+            "Adoption totals only",
+            "Bankers record each outcome; it flows back for analysis"
+          ]
+        ],
+        "y": 1.7,
+        "width": 12.0,
+        "height": 4.4
+      },
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. The whole change in one picture.",
+        "talk_track": "Four shifts. One view of the customer instead of many. A recommendation instead of a guess. Questions answered in seconds instead of a dashboard backlog. And, for the first time, a record of what bankers offered and what happened, so we can learn.",
+        "evidence": [
+          "USE_CASE.md section 5"
+        ],
+        "transition": "We built this end to end as a working prototype.",
+        "likely_question": "Does this replace Power BI? No. Power BI stays; this adds what it cannot do."
+      }
+    },
+    {
+      "id": "s05-journey",
+      "layout": "title_only",
+      "title": "One connected platform, six stages",
+      "table": {
+        "data": [
+          [
+            "Stage",
+            "What it does for the bank",
+            "Proof"
+          ],
+          [
+            "Lakeflow",
+            "Lands four systems' daily files; dedupes, quarantines bad rows, matches each person",
+            "Matching precision 1.0 against ground truth"
+          ],
+          [
+            "Unity Catalog",
+            "Analysts see everyone with names masked; bankers see only their branches",
+            "Tested with a non-admin identity"
+          ],
+          [
+            "ML and GenAI",
+            "Scores every customer for every product; writes the reason a banker can say",
+            "8.2x lift, out-of-time; explanations judged"
+          ],
+          [
+            "Lakebase",
+            "Serves the banker app and stores each outcome, secured by branch",
+            "Other-branch writes rejected"
+          ],
+          [
+            "Genie",
+            "Plain-language questions on adoption, CLV and outcomes",
+            "10 of 10 benchmark questions"
+          ],
+          [
+            "Databricks App",
+            "The banker's screen: my book, the customer, the offer, the outcome",
+            "Outcomes flow back to Genie"
+          ]
+        ],
+        "y": 1.45,
+        "width": 12.0,
+        "height": 4.6
+      },
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Show it is one platform where each stage feeds the next, not six demos.",
+        "talk_track": "Everything runs as one job, every morning after the batch. The pipeline builds the customer view, governance decides who sees what, the model and the language model decide what to offer and why, Lakebase puts it in front of the banker, and what the banker records comes back for analysts to ask about. Take any stage away and the next one has nothing to work with.",
+        "evidence": [
+          "README.md journey table",
+          "evidence/00_setup.txt (12-task job, daily 06:00)",
+          "evidence/02, 03, 06, 07, 10, 12"
+        ],
+        "transition": "Let me show you a banker's morning.",
+        "likely_question": "How much do my engineers maintain? One bundle, one SQL pipeline, one job."
+      }
+    },
+    {
+      "id": "s06-demo",
+      "layout": "content_basic",
+      "title": "A banker's morning",
+      "body": "My book: the customers in my branches, and the next best product for each\nOpen a customer: products held, balances, and the next best product\nThe reason, from facts only, and an opening question to start the conversation\nRecord what happened: accepted, follow up, not interested now, declined\nAnalysts see the outcome in Genie the same day\n[Insert screenshots from deck/screens: 01_my_book, 02_customer_360, 03_record_outcome]",
+      "bullets": true,
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Make it real. Replace the last line with the three screenshots in deck/screens.",
+        "talk_track": "Here is my book for two branches. This customer viewed our money market page five times and started an application. The app says why money market fits and gives me an opening question. After the conversation I record the outcome in one click, and by tomorrow our analysts can ask Genie how these offers are landing.",
+        "evidence": [
+          "deck/screens/*.png (synthetic customers)",
+          "evidence/08_app_test.txt",
+          "evidence/09_feedback_loop.txt"
+        ],
+        "transition": "What is this worth?",
+        "likely_question": "Can bankers override the recommendation? Yes; the top three are shown, and the outcome they record is what we learn from."
+      }
+    },
+    {
+      "id": "s07-value",
+      "layout": "title_only",
+      "title": "What 4% is worth in customer lifetime value",
+      "table": {
+        "data": [
+          [
+            "Driver",
+            "Baseline",
+            "Change",
+            "Assumption",
+            "Illustrative value"
+          ],
+          [
+            "Campaign response",
+            "1.5% today",
+            "4% or more",
+            "One targeted offer a year to 459,000 customers with 2 products or fewer",
+            "About 11,500 added products"
+          ],
+          [
+            "Lifetime value",
+            "",
+            "11,500 products",
+            "Average CLV gain of $1,900 per added product",
+            "About $22M a year"
+          ],
+          [
+            "Banker time",
+            "15 minutes per conversation",
+            "About 3 minutes",
+            "522 branches, 4 bankers, 5 conversations a week",
+            "About 2,100 hours a week (capacity)"
+          ]
+        ],
+        "y": 1.7,
+        "width": 12.2,
+        "height": 3.6
+      },
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. A number with its assumptions on the same slide.",
+        "talk_track": "If one targeted offer a year to our thinner relationships moves response from 1.5% to 4%, that is about 11,500 more products, and about 22 million dollars of lifetime value a year. Every number here is an assumption written next to it, and the CLV figures use illustrative margins. The banker time is capacity, not cash.",
+        "evidence": [
+          "USE_CASE.md section 6",
+          "CLV assumptions in DECISIONS.md and clv_product_assumptions"
+        ],
+        "transition": "Why should you believe the model can get us there?",
+        "likely_question": "Is the $22M a forecast? No. It is illustrative and sized to the bank; the pilot measures the real response rate."
+      }
+    },
+    {
+      "id": "s08-proof",
+      "layout": "title_only",
+      "title": "How we judged it: bars set before the results",
+      "table": {
+        "data": [
+          [
+            "Test",
+            "Bar (set in advance)",
+            "Result"
+          ],
+          [
+            "Model, out-of-time window",
+            "2.7x lift, and 1.2x a simple baseline",
+            "8.2x lift; 1.27x the baseline"
+          ],
+          [
+            "Explanations, LLM judge",
+            "95% grounded, 90% all checks",
+            "Missed twice, fixed; 97% and 95%"
+          ],
+          [
+            "Genie benchmarks",
+            "10 tested questions",
+            "8, 8, then 10 of 10"
+          ],
+          [
+            "Data quality",
+            "Duplicates and bad rows match what was planted",
+            "Matched; matching precision 1.0"
+          ]
+        ],
+        "y": 1.7,
+        "width": 12.0,
+        "height": 3.8
+      },
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Credibility: we wrote the rules first and kept the misses.",
+        "talk_track": "We wrote down what success looks like before running the test. On a window the model never saw, the top 10% of customers it picked opened products at 8.2 times the average rate, and 27% better than a simple rule an analyst could write. The synthetic data makes that look strong, so the number to hold us to is 2.7x on real data. The explanations failed their first two checks; we fixed the cause and kept both failures on record.",
+        "evidence": [
+          "EVAL_PROTOCOL.md (committed before the test)",
+          "evidence/10_eval_protocol.txt",
+          "evidence/11_genai_judge.txt",
+          "evidence/07_genie.txt",
+          "evidence/02_pipeline.txt"
+        ],
+        "transition": "The first question a CDO asks is who can see what.",
+        "likely_question": "Why is the lift so high? Clean synthetic signals; real data will be lower, which is why the bar is 2.7x."
+      }
+    },
+    {
+      "id": "s09-governance",
+      "layout": "title_only",
+      "title": "Governed by role, tested by someone who is not an admin",
+      "table": {
+        "data": [
+          [
+            "Who",
+            "Sees",
+            "Cannot"
+          ],
+          [
+            "Business analyst",
+            "All customers; names, email and date of birth masked",
+            "Identify an individual customer"
+          ],
+          [
+            "Relationship banker",
+            "Full detail, only for customers in their branches",
+            "See other branches, in the platform or the app"
+          ],
+          [
+            "No entitlement",
+            "Nothing",
+            "Read raw customer data or change their own access"
+          ]
+        ],
+        "y": 1.7,
+        "width": 12.0,
+        "height": 3.2
+      },
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Answer the trust question before it is asked.",
+        "talk_track": "One set of rules applies everywhere. Analysts see every customer but not who they are. Bankers see everything, but only for their own branches, in the platform and again in the app's database. We proved it with a test identity that has no admin rights. And the explanations may only use the facts listed, never guesses about income or creditworthiness.",
+        "evidence": [
+          "evidence/03_governance.txt",
+          "evidence/12_access_test.txt",
+          "evidence/06_lakebase.txt"
+        ],
+        "transition": "So what happens next?",
+        "likely_question": "Why an entitlement table and not groups? The prototype workspace cannot create account groups; in production these rules point at your groups."
+      }
+    },
+    {
+      "id": "s10-path",
+      "layout": "content_basic",
+      "title": "Six months to 4%, and what we need from you",
+      "body": "Months 1 to 2: connect the four real systems; pilot with bankers in a few branches\nMonths 3 to 4: run targeted offers; record every outcome\nMonth 6: response rate of 4% or more, or clear evidence of why offers succeed or fail\nIf neither, we stop and reassess\nThe ask: pilot branches, one real campaign, and data access for the four systems",
+      "bullets": true,
+      "notes": {
+        "purpose": "DRAFT, rewrite in your own words. Close on the decision you want, with the stop rule visible.",
+        "talk_track": "We would start small: a handful of branches, one real campaign, and the four systems you already run. In six months we either see a response rate of 4% or more, or we understand exactly why offers land or do not. If we see neither, we stop. What we need from you is the pilot branches, the campaign, and access to the data.",
+        "evidence": [
+          "USE_CASE.md section 4: win and stop at 6 months",
+          "README.md limits"
+        ],
+        "transition": "Thank you. Questions?",
+        "likely_question": "What does it cost to run? Serverless throughout; confirm a cost estimate before quoting one."
+      }
+    },
+    {
+      "id": "s11-close",
+      "layout": "closing",
+      "notes": {
+        "purpose": "DRAFT. Closing slide.",
+        "talk_track": "Thank you.",
+        "evidence": [
+          "None"
+        ],
+        "transition": "Open for questions.",
+        "likely_question": "Can we see it live? Yes: the app and Genie, on synthetic data."
+      }
+    }
+  ]
+}
