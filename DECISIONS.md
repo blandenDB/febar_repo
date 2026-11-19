@@ -155,3 +155,9 @@ Reconfirmed from earlier entries (unchanged): ingestion with Auto Loader from fi
 - **Decision:** one end-to-end job triggered by file arrival on the raw volume, so it runs when the end-of-day files land.
 - **Options considered:** file arrival; daily schedule after the batch window; manual runs.
 - **Why:** [REWRITE IN YOUR WORDS]
+
+## 2026-11-19: Explanations missed the groundedness bar [REWRITE IN YOUR WORDS]
+
+- **Decision:** tighten the explanation prompt (no inferences about creditworthiness, income, capacity, needs or life events; say less when facts are thin), regenerate, and re-run the same judge on the same sample. Run 1 stays on record; the change is a dated note in EVAL_PROTOCOL.md.
+- **Options considered:** tighten and re-run; report the miss and label explanations as drafts; tighten and add an app warning.
+- **Why:** [REWRITE IN YOUR WORDS]

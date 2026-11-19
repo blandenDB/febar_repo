@@ -54,4 +54,4 @@ The model supports a targeting claim only if both hold on the out-of-time test:
 
 ## Change notes
 
-(none yet)
+- **2026-11-19, GenAI explanations, after judge run 1.** Run 1 (200 sampled explanations, judge databricks-claude-sonnet-5-5): grounded 93.5% (bar 95%, not met), all checks 92.0% (bar 90%, met). Result kept in `evidence/11_genai_judge_run1.txt`. Change: the explanation prompt now forbids inferences about creditworthiness, income, capacity, needs or life events, and asks for fewer words when facts are thin. The bars, judge model, guidelines and sample (same 200 customers, same seed) are unchanged. Run 2 is reported next to run 1, not instead of it.
