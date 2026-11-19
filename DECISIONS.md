@@ -187,3 +187,10 @@ Reconfirmed from earlier entries (unchanged): ingestion with Auto Loader from fi
 - **Decision:** problem-led storyline (about 10 slides) for the EVP Data & Analytics and the CDO; Google Slides on the Databricks template, exported to PDF and committed; role-play prep with likely questions and evidence, hard objections, and a practice script with a demo path.
 - **Options considered:** storyline problem-led, value-led or demo-led; format Markdown plus PDF, Google Slides plus PDF, or Markdown only.
 - **Why:** [REWRITE IN YOUR WORDS]
+
+## 2026-11-19: Do not recommend products the customer closed [REWRITE IN YOUR WORDS]
+
+- **Decision:** exclude any product the customer previously held and closed from recommendations, in training and scoring alike.
+- **Options considered:** exclude products closed in the last 12 months (not possible: no closure date in the data); exclude any previously closed product; leave it.
+- **Context:** 76 recommendations (65 of them #1) were for a product the customer had closed, including the customer on deck slide 6.
+- **Why:** [REWRITE IN YOUR WORDS]
