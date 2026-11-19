@@ -140,6 +140,9 @@ def main():
     # 10 Evaluation protocol
     eval_protocol(p, jobs)
 
+    # 11 GenAI judge
+    genai_judge(p, jobs)
+
 
 def lakebase(p, jobs):
     run = latest_success(p, jobs["c360_serve"])
@@ -199,6 +202,22 @@ def eval_protocol(p, jobs):
     body += "\n## Out-of-customer subset (customers not in any training snapshot)\n" + json.dumps(summ.get("out_of_customer"), indent=2)
     body += "\n\n## Full task summary\n" + json.dumps(summ, indent=2) + "\n"
     write("10_eval_protocol.txt", "Evidence 10: out-of-time evaluation under EVAL_PROTOCOL.md", body)
+
+
+def genai_judge(p, jobs):
+    run = latest_success(p, jobs["c360_ml"], task="genai_judge")
+    summ = task_summary(p, run, "genai_judge")
+    body = run_header(run) + "\n\nProtocol: EVAL_PROTOCOL.md (GenAI section), committed 2026-11-19 before the judge first ran.\n\n"
+    body += "## Verdict\n" + json.dumps(summ.get("verdict"), indent=2) + "\n\n## Pass rates\n"
+    body += json.dumps({"sample": summ.get("sample"), "generator": summ.get("generator"), "judge": summ.get("judge"),
+                        "pass_rates": summ.get("pass_rates"), "all_checks_pass_rate": summ.get("all_checks_pass_rate")}, indent=2)
+    body += "\n\n## Examples of failures with the judge's rationale\n"
+    for f in summ.get("examples_of_failures", []):
+        body += f"\n- product: {f['product']}  failed: {', '.join(f['failed'])}\n  explanation: {f['explanation']}\n"
+        for k, v in f.get("rationale", {}).items():
+            body += f"  judge ({k}): {v}\n"
+    body += f"\nMLflow run: {summ.get('mlflow_run_id')}\n"
+    write("11_genai_judge.txt", "Evidence 11: LLM judge on banker explanations", body)
 
 
 if __name__ == "__main__":

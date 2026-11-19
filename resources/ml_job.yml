@@ -54,6 +54,19 @@ resources:
               - ${workspace.file_path}/src/ai
               - --experiment
               - ${resources.experiments.cross_sell.name}
+        - task_key: genai_judge
+          depends_on:
+            - task_key: explanations
+          environment_key: judge
+          spark_python_task:
+            python_file: ../src/ai/05_genai_judge.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema
+              - ${var.schema}
+              - --experiment
+              - ${resources.experiments.cross_sell.name}
       environments:
         - environment_key: ml
           spec:
@@ -61,3 +74,8 @@ resources:
             dependencies:
               - mlflow>=2.16
               - scikit-learn>=1.4
+        - environment_key: judge
+          spec:
+            client: "2"
+            dependencies:
+              - mlflow[databricks]>=3.1
