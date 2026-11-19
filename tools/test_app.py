@@ -27,10 +27,24 @@ for i in range(5):  # pick a different customer each time, as a banker would
     at.selectbox(key="customer_select").select(t).run()
     picks.append(at.selectbox(key="customer_select").value == t)
 headers = [h.value for h in at.subheader]
-ok = after_select == target == after_rerun and header_ok and all(picks) and not at.exception
+
+# Row click in My book: the callback sets these two keys; simulate it and check the
+# Customer 360 page opens on that customer, then "Back to My book" returns.
+at2 = AppTest.from_file(APP, default_timeout=120).run()
+book_first_id = at2.dataframe[0].value.iloc[5]["customer_360_id"]
+at2.session_state["customer_select"] = book_first_id
+at2.session_state["page"] = "Customer 360"
+at2.run()
+row_click_opens_profile = (at2.selectbox(key="customer_select").value == book_first_id
+                           and any(book_first_id in c.value for c in at2.caption))
+at2.button[0].click().run()
+back_returns_to_book = at2.session_state["page"] == "My book" and len(at2.dataframe) > 0
+ok = (after_select == target == after_rerun and header_ok and all(picks) and not at.exception
+      and row_click_opens_profile and back_returns_to_book and not at2.exception)
 print(json.dumps({"step": "app_test", "status": "ok" if ok else "failed", "my_book_rows": book_rows,
                   "customer_options": len(opts), "first_customer_selected_by_default": True,
                   "picked_4th_customer_kept_after_select": after_select == target,
                   "detail_header_matches_pick": header_ok,
-                  "kept_after_rerun": after_select == after_rerun, "five_more_picks_kept": picks, "exceptions": len(at.exception)}))
+                  "kept_after_rerun": after_select == after_rerun, "five_more_picks_kept": picks, "row_click_opens_profile": row_click_opens_profile, "back_returns_to_book": back_returns_to_book,
+                  "exceptions": len(at.exception) + len(at2.exception)}))
 raise SystemExit(0 if ok else 1)

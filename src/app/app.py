@@ -77,7 +77,22 @@ if not branches:
 st.sidebar.write("Branches: " + ", ".join(branches))
 st.sidebar.caption("Synthetic data. Recommendations come from a propensity model ranked by expected CLV uplift; "
                    "CLV uses illustrative assumptions.")
-page = st.sidebar.radio("View", ["My book", "Customer 360"])
+
+
+def open_customer_from_book():
+    """Row click in My book: remember the customer and switch to Customer 360.
+    Runs as a callback, before the next script run, so it can set other widgets' state."""
+    rows = st.session_state["book_table"].selection.rows
+    if rows:
+        st.session_state["customer_select"] = st.session_state["book_ids"][rows[0]]
+        st.session_state["page"] = "Customer 360"
+
+
+def back_to_book():
+    st.session_state["page"] = "My book"
+
+
+page = st.sidebar.radio("View", ["My book", "Customer 360"], key="page")
 
 if page == "My book":
     st.title("My book: next best product")
@@ -106,12 +121,16 @@ if page == "My book":
                        expected_clv_uplift=view["expected_clv_uplift"].map(money),
                        clv_uplift_if_adopted=view["clv_uplift_if_adopted"].map(money),
                        last_outcome=view["last_outcome"].map(lambda a: ACTIONS.get(a, "") if a else ""))
+    st.caption("Click a row to open that customer's 360 profile.")
+    view = view.reset_index(drop=True)
+    st.session_state["book_ids"] = view["customer_360_id"].tolist()
     st.dataframe(view[["customer_360_id", "customer", "branch", "segment", "active_products", "product", "likelihood",
                        "expected_clv_uplift", "clv_uplift_if_adopted", "last_outcome"]],
-                 hide_index=True, use_container_width=True)
-    st.caption("Open a customer in the Customer 360 view to see the reasons and record the outcome.")
+                 hide_index=True, width="stretch", key="book_table",
+                 on_select=open_customer_from_book, selection_mode="single-row")
 
 else:
+    st.button("← Back to My book", on_click=back_to_book)
     st.title("Customer 360")
     ids = run(banker, """SELECT c.customer_360_id, c.first_name || ' ' || c.last_name AS customer
                          FROM app.customers c JOIN app.recommendations r USING (customer_360_id)
@@ -158,7 +177,7 @@ else:
                               WHERE customer_360_id = %s ORDER BY open_date""", (cid,))
         hold["product"] = hold["product"].map(PRODUCT_NAMES)
         hold["balance"] = hold["balance"].map(money)
-        st.dataframe(hold, hide_index=True, use_container_width=True)
+        st.dataframe(hold, hide_index=True, width="stretch")
 
     st.markdown("#### Record the outcome")
     with st.form("feedback", clear_on_submit=True):
@@ -177,4 +196,4 @@ else:
     if not hist.empty:
         hist["product"] = hist["product"].map(PRODUCT_NAMES)
         hist["action"] = hist["action"].map(ACTIONS)
-        st.dataframe(hist, hide_index=True, use_container_width=True)
+        st.dataframe(hist, hide_index=True, width="stretch")
