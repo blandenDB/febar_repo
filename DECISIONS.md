@@ -161,3 +161,9 @@ Reconfirmed from earlier entries (unchanged): ingestion with Auto Loader from fi
 - **Decision:** tighten the explanation prompt (no inferences about creditworthiness, income, capacity, needs or life events; say less when facts are thin), regenerate, and re-run the same judge on the same sample. Run 1 stays on record; the change is a dated note in EVAL_PROTOCOL.md.
 - **Options considered:** tighten and re-run; report the miss and label explanations as drafts; tighten and add an app warning.
 - **Why:** [REWRITE IN YOUR WORDS]
+
+## 2026-11-19: Explanations, second miss [REWRITE IN YOUR WORDS]
+
+- **Decision:** give the explanation model richer, true facts (balances, card spend, digital logins, product count, a similar-customers rate) and keep the strict prompt; re-run the same judge on the same sample.
+- **Options considered:** richer facts and run 3; report runs 1 and 2 as misses; explain only recommendations with a browsing signal.
+- **Why:** [REWRITE IN YOUR WORDS]
