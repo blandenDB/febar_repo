@@ -18,8 +18,8 @@ from databricks.sdk import WorkspaceClient
 
 ENDPOINT = os.environ.get("LAKEBASE_ENDPOINT", "projects/c360-serving/branches/production/endpoints/primary")
 PRODUCT_NAMES = {
-    "checking": "Checking", "savings": "Savings", "cd": "Certificate of deposit", "money_market": "Money market",
-    "mortgage": "Mortgage", "auto_loan": "Auto loan", "heloc": "Home equity line of credit",
+    "checking": "Checking", "savings": "Savings", "cd": "CD", "money_market": "Money market",
+    "mortgage": "Mortgage", "auto_loan": "Auto loan", "heloc": "HELOC",
     "personal_loan": "Personal loan", "credit_card": "Credit card",
 }
 ACTIONS = {"accepted": "Accepted", "follow_up": "Follow up later", "not_interested_now": "Not interested now",
@@ -122,17 +122,18 @@ if page == "My book":
     counts["uplift_label"] = counts["expected_uplift"].map(money)
     pick = alt.selection_point(name="product_pick", fields=["product"], toggle="event.shiftKey")
     base = alt.Chart(counts).encode(
-        y=alt.Y("product_name:N", sort="-x", title=None, axis=alt.Axis(ticks=False, domain=False, labelPadding=8)),
-        x=alt.X("customers:Q", title="Customers with this as their next best product",
+        x=alt.X("product_name:N", sort="-y", title=None,
+                axis=alt.Axis(labelAngle=0, ticks=False, domain=False, labelPadding=8, labelLimit=120)),
+        y=alt.Y("customers:Q", title="Customers", scale=alt.Scale(nice=True),
                 axis=alt.Axis(grid=True, gridOpacity=0.15, domain=False, ticks=False, tickCount=4)))
-    bars = base.mark_bar(size=18, cornerRadiusEnd=4).encode(
+    bars = base.mark_bar(size=24, cornerRadiusEnd=4).encode(
         color=alt.condition(pick, alt.value("#2a78d6"), alt.value("#c9c8c3")),
         tooltip=[alt.Tooltip("product_name:N", title="Product"), alt.Tooltip("customers:Q", title="Customers"),
                  alt.Tooltip("uplift_label:N", title="Expected CLV uplift")],
     ).add_params(pick)
-    labels = base.mark_text(align="left", dx=6, fontSize=12).encode(text="customers:Q")
+    labels = base.mark_text(baseline="bottom", dy=-4, fontSize=12).encode(text="customers:Q")
     st.markdown("**Next best product in my book**")
-    event = st.altair_chart((bars + labels).properties(height=34 * max(len(counts), 1)),
+    event = st.altair_chart((bars + labels).properties(height=280),
                             on_select="rerun", key="product_chart", width="stretch")
     pick_prod = [p["product"] for p in (event.selection.get("product_pick") or []) if "product" in p]
     st.caption("Click a bar to filter the table; shift-click to add products; click the background to clear."
