@@ -1,0 +1,12 @@
+# Evidence 08: banker app regression test (Streamlit AppTest against the live Lakebase views)
+# Captured 2026-11-19T13:36:56Z. Synthetic data only; user identities redacted.
+
+Bug reported in the deployed app: in Customer 360, choosing another customer snapped back to the first one.
+Cause: the customer list was ordered by expected_clv_uplift only (738 rows, 736 distinct values), so tied rows could come back in a different order on each fresh connection; the selectbox had no key, so a changed option order reset it to the first customer.
+Fix: deterministic ORDER BY (expected_clv_uplift DESC, customer_360_id) and a stable widget key.
+
+## Before the fix (app.py at commit 2c44f1b): 5 picks
+{"old_app_first": "C58495690", "picks_kept": [false, false, false, false, false]}
+
+## After the fix: tools/test_app.py
+{"step": "app_test", "status": "ok", "my_book_rows": 738, "customer_options": 738, "first_customer_selected_by_default": true, "picked_4th_customer_kept_after_select": true, "detail_header_matches_pick": true, "kept_after_rerun": true, "five_more_picks_kept": [true, true, true, true, true], "exceptions": 0}

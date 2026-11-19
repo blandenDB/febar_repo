@@ -60,6 +60,8 @@ def money(x):
 
 
 banker = st.context.headers.get("X-Forwarded-Email", "")
+if not banker and not os.environ.get("DATABRICKS_APP_NAME"):
+    banker = os.environ.get("C360_DEV_BANKER", "")  # local testing only; never used inside Databricks Apps
 if not banker:
     st.error("No signed-in user was forwarded to the app. Open it from the Databricks Apps URL.")
     st.stop()
@@ -87,7 +89,7 @@ if page == "My book":
                  WHERE f.customer_360_id = c.customer_360_id ORDER BY f.created_at DESC LIMIT 1) AS last_outcome
         FROM app.recommendations r JOIN app.customers c USING (customer_360_id)
         WHERE r.recommendation_rank = 1
-        ORDER BY r.expected_clv_uplift DESC""")
+        ORDER BY r.expected_clv_uplift DESC, c.customer_360_id""")
     col1, col2, col3 = st.columns(3)
     col1.metric("Customers with a recommendation", f"{len(book):,}")
     col2.metric("Expected CLV uplift (sum)", money(book["expected_clv_uplift"].sum()))
@@ -113,12 +115,15 @@ else:
     st.title("Customer 360")
     ids = run(banker, """SELECT c.customer_360_id, c.first_name || ' ' || c.last_name AS customer
                          FROM app.customers c JOIN app.recommendations r USING (customer_360_id)
-                         WHERE r.recommendation_rank = 1 ORDER BY r.expected_clv_uplift DESC""")
+                         WHERE r.recommendation_rank = 1
+                         ORDER BY r.expected_clv_uplift DESC, c.customer_360_id""")
     if ids.empty:
         st.info("No customers with recommendations in your branches.")
         st.stop()
-    label = dict(zip(ids["customer_360_id"], ids["customer"] + " (" + ids["customer_360_id"] + ")"))
-    cid = st.selectbox("Customer", ids["customer_360_id"], format_func=label.get)
+    options = ids["customer_360_id"].tolist()
+    label = dict(zip(options, (ids["customer"] + " (" + ids["customer_360_id"] + ")").tolist()))
+    # A stable key keeps the banker's choice across reruns even if the list is re-fetched.
+    cid = st.selectbox("Customer (type to search)", options, format_func=label.get, key="customer_select")
     cust = run(banker, "SELECT * FROM app.customers WHERE customer_360_id = %s", (cid,)).iloc[0]
     st.subheader(f"{cust.first_name} {cust.last_name}")
     st.caption(f"{cust.customer_360_id} | {cust.city}, {cust.state} | branch {cust.home_branch_id} | "
