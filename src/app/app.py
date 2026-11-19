@@ -22,6 +22,12 @@ PRODUCT_NAMES = {
     "mortgage": "Mortgage", "auto_loan": "Auto loan", "heloc": "HELOC",
     "personal_loan": "Personal loan", "credit_card": "Credit card",
 }
+# Categorical palette (validated: adjacent CVD dE >= 9.1, normal-vision dE >= 19.6). Fixed order so each
+# product keeps its color everywhere; values and names are printed on the marks for contrast relief.
+PRODUCT_COLORS = {"savings": "#2a78d6", "cd": "#eb6834", "money_market": "#1baf7a", "mortgage": "#eda100",
+                  "auto_loan": "#e87ba4", "heloc": "#008300", "personal_loan": "#6250d6", "credit_card": "#e34948"}
+# Branches use slate tones so they never read as a product.
+BRANCH_COLORS = ["#4b5563", "#c4c9d0", "#1f2937", "#e5e7eb"]
 ACTIONS = {"accepted": "Accepted", "follow_up": "Follow up later", "not_interested_now": "Not interested now",
            "declined": "Declined"}
 
@@ -110,34 +116,75 @@ if page == "My book":
     col1.metric("Customers with a recommendation", f"{len(book):,}")
     col2.metric("Expected CLV uplift (sum)", money(book["expected_clv_uplift"].sum()))
     col3.metric("Outcomes recorded", int(book["last_outcome"].notna().sum()))
-    pick_branch = st.multiselect("Branch", branches, default=branches)
-    in_branch = book[book["branch"].isin(pick_branch)]
+    # Branch pie and product columns, cross-filtered: click a slice or a column to filter
+    # (shift-click to add), click the background to clear. Selections from the last run
+    # are read first so each chart counts only what the other chart has selected.
+    def picked(key, param, field):
+        ev = st.session_state.get(key)
+        sel = (ev or {}).get("selection", {}).get(param) or []
+        return [p[field] for p in sel if field in p]
 
-    # Next best product, ranked: click a bar to filter the table (shift-click for several,
-    # click the background to clear). One hue; unselected bars fade to gray.
-    counts = (in_branch.groupby("product")
+    pick_branch = [b for b in picked("branch_chart", "branch_pick", "branch") if b in branches]
+    pick_prod = picked("product_chart", "product_pick", "product")
+    for_pie = book[book["product"].isin(pick_prod)] if pick_prod else book
+    for_bars = book[book["branch"].isin(pick_branch)] if pick_branch else book
+
+    by_branch = for_pie.groupby("branch").agg(customers=("customer_360_id", "count")).reindex(branches, fill_value=0).reset_index()
+    # Label ink per slice: white on the dark slates, near-black on the light ones.
+    by_branch["label_ink"] = ["#ffffff" if i % 2 == 0 else "#0b0b0b" for i in range(len(by_branch))]
+    bsel = alt.selection_point(name="branch_pick", fields=["branch"], toggle="event.shiftKey")
+    pie_base = alt.Chart(by_branch).encode(
+        theta=alt.Theta("customers:Q", stack=True),
+        color=alt.Color("branch:N", scale=alt.Scale(domain=branches, range=BRANCH_COLORS[:len(branches)]),
+                        legend=alt.Legend(title=None, orient="bottom")),
+        tooltip=[alt.Tooltip("branch:N", title="Branch"), alt.Tooltip("customers:Q", title="Customers")])
+    pie = pie_base.mark_arc(outerRadius=110, stroke="#ffffff", strokeWidth=2).encode(
+        opacity=alt.condition(bsel, alt.value(1.0), alt.value(0.3))).add_params(bsel)
+    pie_labels = pie_base.mark_text(radius=72, fontSize=13, fontWeight="bold").encode(
+        text="customers:Q", color=alt.Color("label_ink:N", scale=None))
+
+    counts = (for_bars.groupby("product")
               .agg(customers=("customer_360_id", "count"), expected_uplift=("expected_clv_uplift", "sum"))
               .reset_index())
     counts["product_name"] = counts["product"].map(PRODUCT_NAMES)
     counts["uplift_label"] = counts["expected_uplift"].map(money)
-    pick = alt.selection_point(name="product_pick", fields=["product"], toggle="event.shiftKey")
-    base = alt.Chart(counts).encode(
-        x=alt.X("product_name:N", sort="-y", title=None,
+    psel = alt.selection_point(name="product_pick", fields=["product"], toggle="event.shiftKey")
+    order = list(PRODUCT_COLORS)
+    bar_base = alt.Chart(counts).encode(
+        x=alt.X("product_name:N", sort=counts.sort_values("customers", ascending=False)["product_name"].tolist(),
+                title=None,
                 axis=alt.Axis(labelAngle=0, ticks=False, domain=False, labelPadding=8, labelLimit=120)),
-        y=alt.Y("customers:Q", title="Customers", scale=alt.Scale(nice=True),
+        y=alt.Y("customers:Q", title="Customers",
+                scale=alt.Scale(domain=[0, max(1, int(counts["customers"].max() * 1.15))], nice=False),
                 axis=alt.Axis(grid=True, gridOpacity=0.15, domain=False, ticks=False, tickCount=4)))
-    bars = base.mark_bar(size=24, cornerRadiusEnd=4).encode(
-        color=alt.condition(pick, alt.value("#2a78d6"), alt.value("#c9c8c3")),
+    bars = bar_base.mark_bar(size=24, cornerRadiusEnd=4).encode(
+        color=alt.Color("product:N", scale=alt.Scale(domain=order, range=[PRODUCT_COLORS[p] for p in order]),
+                        legend=None),
+        opacity=alt.condition(psel, alt.value(1.0), alt.value(0.3)),
         tooltip=[alt.Tooltip("product_name:N", title="Product"), alt.Tooltip("customers:Q", title="Customers"),
                  alt.Tooltip("uplift_label:N", title="Expected CLV uplift")],
-    ).add_params(pick)
-    labels = base.mark_text(baseline="bottom", dy=-4, fontSize=12).encode(text="customers:Q")
-    st.markdown("**Next best product in my book**")
-    event = st.altair_chart((bars + labels).properties(height=280),
-                            on_select="rerun", key="product_chart", width="stretch")
-    pick_prod = [p["product"] for p in (event.selection.get("product_pick") or []) if "product" in p]
-    st.caption("Click a bar to filter the table; shift-click to add products; click the background to clear."
-               + (f" Showing: {', '.join(PRODUCT_NAMES.get(p, p) for p in pick_prod)}." if pick_prod else ""))
+    ).add_params(psel)
+    bar_labels = bar_base.mark_text(baseline="bottom", dy=-4, fontSize=12).encode(text="customers:Q")
+
+    left, right = st.columns([1, 2])
+    with left:
+        st.markdown("**Customers by branch**")
+        st.altair_chart((pie + pie_labels).properties(height=280).configure_view(strokeWidth=0),
+                        on_select="rerun", key="branch_chart",
+                        width="stretch")
+    with right:
+        st.markdown("**Next best product**")
+        st.altair_chart((bars + bar_labels).properties(height=280).configure_view(strokeWidth=0),
+                        on_select="rerun", key="product_chart",
+                        width="stretch")
+    showing = []
+    if pick_branch:
+        showing.append("branch " + ", ".join(pick_branch))
+    if pick_prod:
+        showing.append(", ".join(PRODUCT_NAMES.get(p, p) for p in pick_prod))
+    st.caption("Click a slice or a column to filter; shift-click to add; click the background to clear."
+               + (f" Showing: {'; '.join(showing)}." if showing else ""))
+    in_branch = book[book["branch"].isin(pick_branch)] if pick_branch else book
     view = in_branch[in_branch["product"].isin(pick_prod)] if pick_prod else in_branch
     view = view.assign(product=view["product"].map(PRODUCT_NAMES),
                        likelihood=(view["propensity"] * 100).round(1).astype(str) + "%",
