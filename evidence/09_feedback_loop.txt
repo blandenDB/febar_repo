@@ -1,0 +1,33 @@
+# Evidence 09: closed loop - banker app -> Lakebase -> Unity Catalog -> Genie
+# Captured 2026-11-19T14:27:30Z. Synthetic customers; banker identities pseudonymized; user identities redacted.
+
+A relationship banker recorded 3 outcomes in the app (written to Lakebase app.banker_feedback under row-level security).
+
+## c360_feedback_sync runs (second run shows the MERGE is idempotent: 3 -> 3)
+run 52338969604821 SUCCESS: {"step": "feedback_to_uc", "status": "ok", "lakebase_rows": 3, "uc_rows_before": 0, "uc_rows_after": 3, "actions": {"accepted": 2, "follow_up": 1}}
+run 688239023297844 SUCCESS: {"step": "feedback_to_uc", "status": "ok", "lakebase_rows": 3, "uc_rows_before": 3, "uc_rows_after": 3, "actions": {"accepted": 2, "follow_up": 1}}
+
+## banker_feedback in Unity Catalog (copied from Lakebase; banker identities pseudonymized)
+product      action     home_branch_id  responses  bankers
+-----------  ---------  --------------  ---------  -------
+cd           follow_up  BR002           1          1      
+credit_card  accepted   BR002           1          1      
+heloc        accepted   BR001           1          1      
+
+## Feedback joined to the recommendation it acted on
+product      action     recommendation_rank  propensity  expected_clv_uplift
+-----------  ---------  -------------------  ----------  -------------------
+cd           follow_up  1                    0.676       1934.0             
+credit_card  accepted   1                    0.901       3460.0             
+heloc        accepted   1                    0.362       1229.0             
+
+## Genie analyst space, question: How have bankers responded to recommendations so far, by product and outcome?
+Genie SQL:
+SELECT `product`, `action` AS `outcome`, COUNT(*) AS `responses`
+FROM `c360_bank`.`customer_lifetime_value`.`banker_feedback`
+WHERE `product` IS NOT NULL
+  AND `action` IS NOT NULL
+GROUP BY `product`, `action`
+ORDER BY `product`, `responses` DESC, `outcome`
+Genie answer: So far, the visible responses show **3** product-outcome combinations, each with **1** response: **cd – follow_up**, **credit_card – accepted**, and **heloc – accepted**. In this sample, **accepted** appears for **2 of the 3** products, while **follow_up** appears for **1** product.
+status: COMPLETED
