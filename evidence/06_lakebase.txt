@@ -1,7 +1,7 @@
 # Evidence 06: Lakebase operational serving (synced tables, Postgres access control, feedback loop)
-# Captured 2026-11-19T20:25:51Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-19T21:50:00Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-Job 'c360_end_to_end' run 179619515379654: SUCCESS, started 2026-11-19T20:04:26Z, 18.0 min. Tasks: access_policies=SUCCESS, refresh_pipeline=SUCCESS, train_and_score=SUCCESS, postgres_setup=SUCCESS, eval_protocol=SUCCESS, access_test=SUCCESS, genai_judge=SUCCESS, explanations=SUCCESS, serving_tables=SUCCESS, clv_assumptions=SUCCESS, refresh_synced_tables=SUCCESS, pii_tags=SUCCESS
+Job 'c360_end_to_end' run 1059530375426300: SUCCESS, started 2026-11-19T21:27:39Z, 16.5 min. Tasks: access_policies=SUCCESS, refresh_pipeline=SUCCESS, train_and_score=SUCCESS, postgres_setup=SUCCESS, eval_protocol=SUCCESS, access_test=SUCCESS, genai_judge=SUCCESS, explanations=SUCCESS, serving_tables=SUCCESS, clv_assumptions=SUCCESS, refresh_synced_tables=SUCCESS, pii_tags=SUCCESS
 
 ## Task stdout: JSON summary (refresh_synced_tables)
 {
@@ -37,7 +37,7 @@ Job 'c360_end_to_end' run 179619515379654: SUCCESS, started 2026-11-19T20:04:26Z
     "roster_banker": {
       "customers": 6597,
       "branches": "BR001,BR002",
-      "recommendations": 1237
+      "recommendations": 1162
     },
     "not_in_roster": {
       "customers": 0,

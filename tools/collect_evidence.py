@@ -199,7 +199,7 @@ def eval_protocol(p, jobs):
     run = latest_success(p, jobs[E2E], task="eval_protocol")
     summ = task_summary(p, run, "eval_protocol")
     o, v = summ.get("overall", {}), summ.get("verdict", {})
-    body = run_header(run) + "\n\nProtocol: EVAL_PROTOCOL.md, committed 2026-11-19 before this test first ran (git commit fb4993f).\n\n"
+    body = run_header(run) + "\n\nProtocol: EVAL_PROTOCOL.md, committed 2026-11-19 before this test first ran (git commit fb4993f). Run 1 (before excluding previously closed products, see the change note): evidence/10_eval_protocol_run1.txt, lift 8.23x, 1.27x the baseline.\n\n"
     body += "## Verdict\n" + json.dumps(v, indent=2) + "\n\n## Overall (out-of-time test window)\n"
     body += "\n".join(f"{k:32s} {o.get(k)}" for k in o) + "\n\n## Per product (claims only where positives >= 30)\n"
     body += f"{'product':15s} {'positives':>9s} {'model_lift':>10s} {'base_lift':>9s} {'model_auc':>9s}  usable\n"

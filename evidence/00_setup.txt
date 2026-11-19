@@ -1,5 +1,5 @@
 # Evidence 00: what is deployed (bundle resources, schemas, trigger)
-# Captured 2026-11-19T20:28:03Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-19T21:47:48Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
 Workspace: https://fevm-febar-c360-bank.cloud.databricks.com  (bundle febar_c360_bank, target febar)
 
@@ -21,7 +21,7 @@ schemas                  serving                          id=c360_bank.serving
 volumes                  ground_truth                     id=c360_bank.customer_lifetime_value.ground_truth
 volumes                  raw                              id=c360_bank.customer_lifetime_value.raw
 
-Job c360_end_to_end schedule: {"pause_status": "UNPAUSED", "quartz_cron_expression": "0 0 6 * * ?", "timezone_id": "America/Chicago"}  (file arrival trigger: null)
+Job c360_end_to_end schedule: {"pause_status": "PAUSED", "quartz_cron_expression": "0 0 6 * * ?", "timezone_id": "America/Chicago"}  (file arrival trigger: null)
 Task order: access_policies<-[], access_test<-[pii_tags], clv_assumptions<-[refresh_pipeline], eval_protocol<-[refresh_pipeline], explanations<-[train_and_score], genai_judge<-[explanations], pii_tags<-[refresh_pipeline], postgres_setup<-[refresh_synced_tables], refresh_pipeline<-[access_policies], refresh_synced_tables<-[serving_tables], serving_tables<-[explanations,pii_tags], train_and_score<-[clv_assumptions]
 
 App c360-banker: RUNNING, compute ACTIVE

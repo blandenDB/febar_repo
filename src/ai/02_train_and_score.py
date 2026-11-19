@@ -1,5 +1,7 @@
 """Cross-sell propensity model, CLV and recommendations.
 
+Candidates exclude products the customer already holds and products they held and closed.
+
 1. Point-in-time training set: snapshots S_k = as_of - k x horizon (k = 1..n). For each,
    features use only data on or before S_k; the label is "opened product P in
    (S_k, S_k + horizon]". One row per (snapshot, customer, product not held at S_k).
@@ -105,6 +107,11 @@ def snapshot_features(spark, fq, snap, horizon_days=None):
       WHERE t.txn_ts > DATE_SUB(DATE '{snap}', 365) AND t.txn_ts < DATE_ADD(DATE '{snap}', 1)
       GROUP BY m.customer_360_id
     ),
+    closed_before AS (
+      -- Products the customer held and closed: never recommend them again.
+      SELECT DISTINCT customer_360_id, product FROM {fq}.gold_product_holdings
+      WHERE status = 'closed' AND open_date <= DATE '{snap}'
+    ),
     digital_users AS (
       SELECT DISTINCT customer_360_id FROM {fq}.customer_identity_map WHERE system = 'digital'
     ),
@@ -131,7 +138,8 @@ def snapshot_features(spark, fq, snap, horizon_days=None):
     LEFT JOIN interest_tot it ON it.customer_360_id = c.customer_360_id
     LEFT JOIN spend s ON s.customer_360_id = c.customer_360_id
     LEFT JOIN digital_users du ON du.customer_360_id = c.customer_360_id
-    WHERE hp.customer_360_id IS NULL
+    LEFT JOIN closed_before cb ON cb.customer_360_id = c.customer_360_id AND cb.product = p.product
+    WHERE hp.customer_360_id IS NULL AND cb.customer_360_id IS NULL
     """
     df = spark.sql(sql).toPandas()
     df["product_code"] = df["product"].map({p: i for i, p in enumerate(PRODUCTS)})

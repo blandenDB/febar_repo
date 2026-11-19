@@ -1,7 +1,7 @@
 # Evidence 11: LLM judge on banker explanations
-# Captured 2026-11-19T20:26:11Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-19T21:50:20Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-Job 'c360_end_to_end' run 179619515379654: SUCCESS, started 2026-11-19T20:04:26Z, 18.0 min. Tasks: access_policies=SUCCESS, refresh_pipeline=SUCCESS, train_and_score=SUCCESS, postgres_setup=SUCCESS, eval_protocol=SUCCESS, access_test=SUCCESS, genai_judge=SUCCESS, explanations=SUCCESS, serving_tables=SUCCESS, clv_assumptions=SUCCESS, refresh_synced_tables=SUCCESS, pii_tags=SUCCESS
+Job 'c360_end_to_end' run 624946955297960: SUCCESS, started 2026-11-19T21:44:32Z, 2.3 min. Tasks: access_policies=DISABLED, refresh_pipeline=DISABLED, train_and_score=DISABLED, postgres_setup=DISABLED, eval_protocol=DISABLED, access_test=DISABLED, genai_judge=SUCCESS, explanations=DISABLED, serving_tables=DISABLED, clv_assumptions=DISABLED, refresh_synced_tables=DISABLED, pii_tags=DISABLED
 
 Protocol: EVAL_PROTOCOL.md (GenAI section), committed 2026-11-19 before the judge first ran.
 
@@ -9,7 +9,7 @@ Protocol: EVAL_PROTOCOL.md (GenAI section), committed 2026-11-19 before the judg
 run 1  original prompt              grounded 93.5%  relevant 100%   opener 98.5%  all 92.0%  NOT MET (grounded)  evidence/11_genai_judge_run1.txt
 run 2  strict no-inference prompt   grounded 97.0%  relevant 73.5%  opener 97.0%  all 67.5%  NOT MET (all checks) evidence/11_genai_judge_run2.txt
 run 3  strict prompt + richer facts grounded 97.0%  relevant 98.0%  opener 100%   all 95.0%  MET                  evidence/11_genai_judge_run3.txt
-run 4  end-to-end job (latest)      grounded 96.0%  relevant 99.0%  opener 98.0%  all 93.0%  MET  (this file)
+run 4  end-to-end job (latest)      grounded 98.0%  relevant 99.0%  opener 99.5%  all 96.5%  MET  (this file)
 Sample: 200 explanations chosen by the same rule each run (seeded hash of customer_360_id). Re-scoring before run 3 changed which customers have a recommendation, so run 3's sample is chosen the same way but is not the identical 200.
 
 ## Latest run
@@ -28,56 +28,49 @@ Sample: 200 explanations chosen by the same rule each run (seeded hash of custom
   "generator": "databricks-claude-haiku-5-5",
   "judge": "databricks-claude-sonnet-5-5",
   "pass_rates": {
-    "grounded": 0.96,
+    "grounded": 0.98,
     "relevant": 0.99,
-    "opener": 0.98
+    "opener": 0.995
   },
-  "all_checks_pass_rate": 0.93
+  "all_checks_pass_rate": 0.965
 }
 
 ## Examples of failures with the judge's rationale
 
-- product: personal_loan  failed: opener
-  explanation: Why: The customer has been with the bank for 2.6 years, holds checking and savings accounts, and keeps $7,841 in deposit accounts with us. They viewed the personal loan page once and logged in to digital banking twice in the last 90 days, and customers with a similar profile open a personal loan about 13 times as often as the average customer.
-
-Opener: "How has your experience with us been lately,
-  judge (opener): The guideline requires the response to include one natural, non-pushy question a banker could ask the customer. The response has a 'Why' section and an 'Opener' section. The Opener is: "How has your experience with us been lately, and is there anything you've been looking at with your accounts?" Thi
-
-- product: personal_loan  failed: opener
-  explanation: Why: The customer holds checking, savings, and a credit card with the bank, keeps $32,743 in deposit accounts, and has been a customer for 1.9 years. Customers with a similar profile open a personal loan about 3 times as often as the average customer.
-
-Opener: "How has your experience with us been so far, and is there anything you'd like to make sure we cover today?"
-  judge (opener): The guideline requires the response to include one natural, non-pushy question a banker could ask the customer. The response has an 'Opener' with a question: 'How has your experience with us been so far, and is there anything you'd like to make sure we cover today?' This is natural and non-pushy. Ho
-
-- product: personal_loan  failed: opener
-  explanation: Why: The customer holds checking and savings accounts with the bank, keeps $1,115 in deposits, and has been a customer for 0.4 years, while customers with a similar profile open personal loans about 3 times as often as the average customer. The customer is also not enrolled in digital banking.
-Opener: "How has your experience with us been so far, and is there anything you'd like to go over today?"
-  judge (opener): The guideline requires the response to include exactly one natural, non-pushy question a banker could ask the customer. The response has a 'Why' section with no questions, and an 'Opener' that reads: "How has your experience with us been so far, and is there anything you'd like to go over today?" Th
-
-- product: mortgage  failed: relevant
-  explanation: Why: The customer viewed the mortgage page once in the last 90 days, logged in to digital banking twice in that period, holds a checking account, and keeps $2,527 in deposit accounts with the bank. They have been a mass-segment customer for 0.6 years.
-Opener: "How has banking with us been working for you so far?"
-  judge (relevant): The guideline requires the response to explain why the recommended product (mortgage) fits this particular customer. The response has a 'Why:' section, but it only restates the customer facts: one mortgage page view, two logins, a checking account, $2,527 in deposits, and 0.6 years as a mass-segment
-
 - product: personal_loan  failed: grounded
-  explanation: Why: The customer has held a checking account with the bank for 2.1 years and keeps $3,915 in deposit accounts there, and customers with a similar profile open a personal loan about 3 times as often as the average customer. The customer is not enrolled in digital banking.
+  explanation: Why: Customers with a similar profile open a personal loan about three times as often as the average customer. The customer has held a checking account and kept $5,747 in deposits with the bank for 0.9 years, so they match that profile.
+Opener: "Is there anything about your banking with us you'd like to talk through today?"
+  judge (grounded): The guideline requires the response to state only facts that appear in the customer facts and not to invent any details. The customer facts are: holds a checking account; keeps $5,747 in deposit accounts; not enrolled in digital banking; similar-profile customers open a personal loan about 3 times a
 
-Opener: "Is there anything about your banking you'd like to talk through today?"
-  judge (grounded): The guideline says the response may only state facts that appear in the customer facts and must not invent numbers, rates, fees, promotions, life events or other details. The customer facts are: holds a checking account, keeps $3,915 in deposit accounts, not enrolled in digital banking, similar-prof
-
-- product: personal_loan  failed: grounded
-  explanation: Why: The customer has held a checking account and an auto loan with the bank for 2.0 years, with $15,504 in outstanding loans and $2,013 in deposits, and customers with a similar profile open personal loans about three times as often as the average customer.
-Opener: "How has your experience banking with us been over the past couple of years?"
-  judge (grounded): The guideline requires the response to state only facts that appear in the customer facts and not to invent any details. The response says the customer has held a checking account and an auto loan for 2.0 years. The facts say the customer currently holds both products and has been a customer for 2.0
-
-- product: credit_card  failed: relevant
-  explanation: Why: The customer is a mass affluent client of 2.1 years who already holds a personal loan with $6,023 outstanding across loans with the bank, and customers with a similar profile open a credit card about 3 times as often as the average customer. The customer is not enrolled in digital banking, which is also a fact worth knowing going into the conversation.
-Opener: "Is there anything about your cu
-  judge (relevant): The guideline requires the response to explain why the recommended product (a credit card) fits this particular customer. The response has a 'Why:' section that cites customer-specific facts: mass affluent segment, 2.1 years of tenure, a personal loan with $6,023 outstanding, and the fact that simil
+- product: money_market  failed: grounded
+  explanation: Why: The customer has held a savings account with us for 2.1 years, keeps $2,826 in deposit accounts, and is in the affluent segment, so a money market account would sit alongside the savings account they already use.
+Opener: "Have you had a chance to look at how your savings are set up with us lately?"
+  judge (grounded): The guideline says the response may only state facts that appear in the customer facts and must not invent numbers, rates, fees, promotions, life events, or other details. The customer facts say the customer holds a checking account, a savings account, and a credit card. They keep $2,826 in deposit 
 
 - product: heloc  failed: grounded
-  explanation: Why: The customer has held a checking account and kept $870 in deposits with the bank for 0.5 years, and customers with a similar profile open a home equity line of credit about 3 times as often as the average customer.
-Opener: "How has your experience with us been so far?"
-  judge (grounded): The guideline says the response may only state facts that appear in the customer facts and must not invent details. The customer facts are: a checking account, $870 in deposit accounts, not enrolled in digital banking, similar customers open a HELOC about 3 times as often as average, and a customer 
+  explanation: Why: The customer started an online application for a home equity line of credit and viewed the page in the last 90 days, and customers with a similar profile open this product about 14 times as often as the average customer. The customer has held a checking account and a credit card for 4.9 years.
 
-MLflow run: b51ac547557b4679b49dc21999d2a1e8
+Opener: "What questions came up for you when you started the online application for the home equity
+  judge (grounded): The guideline requires that the response state only facts in the customer facts and not invent any details. Checking each claim: (1) The customer started an online HELOC application in the last 90 days. This is in the facts. (2) The customer viewed the page in the last 90 days. This is in the facts 
+
+- product: credit_card  failed: opener
+  explanation: Why: The customer viewed the credit card page twice online in the last 90 days, has been with the bank for 5.2 years, and already holds a certificate of deposit, an auto loan, and a personal loan. Customers with a similar profile open a credit card about 8 times as often as the average customer.
+Opener: "I noticed you've been looking at our credit card information online, so I'm happy to answer an
+  judge (opener): The guideline requires the response to include one natural, non-pushy question a banker could ask the customer. The response has a 'Why' section and an 'Opener'. The opener is: "I noticed you've been looking at our credit card information online, so I'm happy to answer any questions you have about i
+
+- product: mortgage  failed: relevant
+  explanation: Why: The customer holds a certificate of deposit, a money market account, and a credit card, keeps $65,441 in deposit accounts with the bank, and has been a customer for 2.8 years in the affluent segment, so the relationship is established and deposit-heavy.
+Opener: "How has your experience banking with us been over the past few years?"
+  judge (relevant): The guideline requires the response to explain why the recommended product (a mortgage) fits this particular customer. The response has a 'Why' section that cites the customer's holdings (CD, money market account, credit card), the $65,441 in deposits, the 2.8-year tenure, and the affluent segment, 
+
+- product: mortgage  failed: relevant
+  explanation: Why: The customer started an online mortgage application in the last 90 days and has been with the bank for 6.0 years, holding a checking account and an auto loan along with $5,575 in deposits. Their $33,663 in outstanding bank loans and 2 digital banking logins in the last 90 days are also on record.
+Opener: "Is there anything about the mortgage application you started online that I can help you 
+  judge (relevant): The guideline requires the response to explain why the recommended product (a mortgage) fits this particular customer. The response has a 'Why' section that lists customer facts: the started online mortgage application, 6.0 years of tenure, a checking account and an auto loan, $5,575 in deposits, $3
+
+- product: mortgage  failed: grounded
+  explanation: Why: The customer has held a checking account, savings account, and credit card with the bank for 2.4 years, keeps $8,619 in deposit accounts, and viewed the mortgage page once in the last 90 days, so a mortgage conversation is a relevant topic to raise.
+Opener: "I noticed you took a look at our mortgage page recently. Was there anything there you'd like to know more about?"
+  judge (grounded): The guideline requires the response to state only facts that appear in the customer facts and not to invent any details. The response says the customer 'has held a checking account, savings account, and credit card with the bank for 2.4 years.' The facts say the customer currently holds those three 
+
+MLflow run: de4606d872284ae2977b36aba461eb3a

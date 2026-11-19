@@ -168,7 +168,7 @@
       "bullets": true,
       "notes": {
         "purpose": "DRAFT, rewrite in your own words. Make it real. Replace the last line with the three screenshots in deck/screens.",
-        "talk_track": "Here is my book for two branches. This customer viewed our money market page five times and started an application. The app says why money market fits and gives me an opening question. After the conversation I record the outcome in one click, and by tomorrow our analysts can ask Genie how these offers are landing.",
+        "talk_track": "Here is my book for two branches. This customer holds only a checking account and viewed our mortgage page twice this quarter. The app says why a mortgage fits, using only those facts, and gives me an opening question. After the conversation I record the outcome in one click, and by tomorrow our analysts can ask Genie how these offers are landing.",
         "evidence": [
           "deck/screens/*.png (synthetic customers)",
           "evidence/08_app_test.txt",

@@ -1,5 +1,5 @@
 # Evidence 07: Genie analyst space and benchmark evaluations
-# Captured 2026-11-19T20:26:07Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-19T21:50:15Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
 Genie space 01f1e3a11b1d1fd29b05b513c1bea937: 5 tables, instructions, 8 sample questions, 3 example SQLs, 10 benchmark questions.
 

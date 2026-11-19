@@ -1,7 +1,7 @@
 # Evidence 04: cross-sell propensity model, CLV and recommendations
-# Captured 2026-11-19T20:25:33Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
+# Captured 2026-11-19T21:49:41Z by tools/collect_evidence.py. Synthetic data only; user identities redacted.
 
-Job 'c360_end_to_end' run 179619515379654: SUCCESS, started 2026-11-19T20:04:26Z, 18.0 min. Tasks: access_policies=SUCCESS, refresh_pipeline=SUCCESS, train_and_score=SUCCESS, postgres_setup=SUCCESS, eval_protocol=SUCCESS, access_test=SUCCESS, genai_judge=SUCCESS, explanations=SUCCESS, serving_tables=SUCCESS, clv_assumptions=SUCCESS, refresh_synced_tables=SUCCESS, pii_tags=SUCCESS
+Job 'c360_end_to_end' run 1059530375426300: SUCCESS, started 2026-11-19T21:27:39Z, 16.5 min. Tasks: access_policies=SUCCESS, refresh_pipeline=SUCCESS, train_and_score=SUCCESS, postgres_setup=SUCCESS, eval_protocol=SUCCESS, access_test=SUCCESS, genai_judge=SUCCESS, explanations=SUCCESS, serving_tables=SUCCESS, clv_assumptions=SUCCESS, refresh_synced_tables=SUCCESS, pii_tags=SUCCESS
 
 ## Task stdout: JSON summary (train_and_score)
 {
@@ -10,110 +10,111 @@ Job 'c360_end_to_end' run 179619515379654: SUCCESS, started 2026-11-19T20:04:26Z
   "snapshot_date": "2026-09-01,2026-07-03,2026-05-04,2026-03-05",
   "as_of": "2026-10-31",
   "model": "c360_bank.customer_lifetime_value.cross_sell_propensity",
-  "model_version": "8",
-  "mlflow_run_id": "61c5858dc018486c891fe40207255be3",
+  "model_version": "9",
+  "mlflow_run_id": "1fc18d8cf05b49d489cbc3a376c82056",
   "metrics": {
-    "auc_overall": 0.9426,
-    "lift_top_decile_overall": 8.1148,
-    "train_rows": 833830,
-    "test_rows": 278583,
-    "train_positives": 3081,
-    "test_positives": 1029
+    "auc_overall": 0.9532,
+    "lift_top_decile_overall": 8.4593,
+    "train_rows": 825475,
+    "test_rows": 275992,
+    "train_positives": 3114,
+    "test_positives": 993
   },
   "per_product": {
     "savings": {
-      "test_rows": 14307,
-      "positives": 330,
-      "base_rate": 0.02307,
-      "auc": 0.8685,
-      "lift_top_decile": 5.82
+      "test_rows": 12547,
+      "positives": 329,
+      "base_rate": 0.02622,
+      "auc": 0.8708,
+      "lift_top_decile": 6.26
     },
     "cd": {
-      "test_rows": 40400,
-      "positives": 65,
-      "base_rate": 0.00161,
-      "auc": 0.9106,
-      "lift_top_decile": 6.62
+      "test_rows": 40198,
+      "positives": 67,
+      "base_rate": 0.00167,
+      "auc": 0.9314,
+      "lift_top_decile": 7.46
     },
     "money_market": {
-      "test_rows": 41854,
-      "positives": 69,
-      "base_rate": 0.00165,
-      "auc": 0.9055,
-      "lift_top_decile": 6.96
+      "test_rows": 41442,
+      "positives": 62,
+      "base_rate": 0.0015,
+      "auc": 0.9144,
+      "lift_top_decile": 7.1
     },
     "mortgage": {
-      "test_rows": 37767,
-      "positives": 83,
-      "base_rate": 0.0022,
-      "auc": 0.9167,
-      "lift_top_decile": 7.47
+      "test_rows": 37695,
+      "positives": 74,
+      "base_rate": 0.00196,
+      "auc": 0.9489,
+      "lift_top_decile": 8.11
     },
     "auto_loan": {
-      "test_rows": 34689,
-      "positives": 132,
-      "base_rate": 0.00381,
-      "auc": 0.9096,
-      "lift_top_decile": 7.05
+      "test_rows": 34795,
+      "positives": 136,
+      "base_rate": 0.00391,
+      "auc": 0.9141,
+      "lift_top_decile": 7.57
     },
     "heloc": {
-      "test_rows": 44967,
-      "positives": 30,
-      "base_rate": 0.00067,
-      "auc": 0.9124,
-      "lift_top_decile": 7.67
+      "test_rows": 45026,
+      "positives": 24,
+      "base_rate": 0.00053,
+      "auc": 0.953,
+      "lift_top_decile": 9.17
     },
     "personal_loan": {
-      "test_rows": 43430,
-      "positives": 49,
-      "base_rate": 0.00113,
-      "auc": 0.9387,
-      "lift_top_decile": 8.37
+      "test_rows": 43616,
+      "positives": 36,
+      "base_rate": 0.00083,
+      "auc": 0.9369,
+      "lift_top_decile": 8.89
     },
     "credit_card": {
-      "test_rows": 21169,
-      "positives": 271,
-      "base_rate": 0.0128,
-      "auc": 0.9044,
-      "lift_top_decile": 6.76
+      "test_rows": 20673,
+      "positives": 265,
+      "base_rate": 0.01282,
+      "auc": 0.9097,
+      "lift_top_decile": 7.02
     }
   },
   "top_features": [
     "tenure_years",
-    "product_code",
     "views_product_90d",
+    "product_code",
     "is_digital",
-    "segment_code",
-    "app_starts_product_90d"
+    "age",
+    "digital_events_90d"
   ],
-  "customers_scored": 50191,
-  "customers_with_recommendation": 6876,
+  "customers_scored": 50190,
+  "customers_with_recommendation": 6029,
   "base_rate_by_product": {
-    "auto_loan": 0.00344,
+    "auto_loan": 0.0034,
     "cd": 0.00197,
-    "credit_card": 0.01224,
-    "heloc": 0.00053,
-    "money_market": 0.0016,
-    "mortgage": 0.0021,
-    "personal_loan": 0.00119,
-    "savings": 0.02475
+    "credit_card": 0.01277,
+    "heloc": 0.00057,
+    "money_market": 0.00167,
+    "mortgage": 0.00218,
+    "personal_loan": 0.0013,
+    "savings": 0.02724
   },
-  "recommendation_rows": 9787,
+  "recommendation_rows": 8917,
   "top1_product_mix": {
-    "personal_loan": 1658,
-    "mortgage": 1283,
-    "heloc": 1114,
-    "money_market": 745,
-    "credit_card": 668,
-    "cd": 510,
-    "auto_loan": 484,
-    "savings": 414
+    "mortgage": 1488,
+    "heloc": 983,
+    "money_market": 947,
+    "personal_loan": 678,
+    "cd": 594,
+    "auto_loan": 537,
+    "credit_card": 490,
+    "savings": 312
   },
   "total_clv_musd": 276.1,
-  "total_expected_clv_uplift_top1_musd": 0.5
+  "total_expected_clv_uplift_top1_musd": 0.46
 }
 
 ## Unity Catalog model c360_bank.customer_lifetime_value.cross_sell_propensity
+version 9  status READY  run 1fc18d8cf05b49d489cbc3a376c82056
 version 8  status READY  run 61c5858dc018486c891fe40207255be3
 version 7  status READY  run ee105d96f12d44ed8a86960c61c7f6cf
 version 6  status READY  run 12bb0d0057814871a43bcbd9eb03c22c
@@ -122,32 +123,32 @@ version 4  status READY  run 3fdbcb16c2d24f92b905753786233380
 version 3  status READY  run c9a5dbd3ef7646459bb609d2641d6487
 version 2  status READY  run 23d8c667c16f471ca8621db52faab5bf
 version 1  status READY  run f3532928cece4e119e03c28933805727
-aliases: {'champion': 8}
+aliases: {'champion': 9}
 
-## MLflow run 61c5858dc018486c891fe40207255be3 metrics
+## MLflow run 1fc18d8cf05b49d489cbc3a376c82056 metrics
 {
-  "auc_auto_loan": 0.9096,
-  "auc_cd": 0.9106,
-  "auc_credit_card": 0.9044,
-  "auc_heloc": 0.9124,
-  "auc_money_market": 0.9055,
-  "auc_mortgage": 0.9167,
-  "auc_overall": 0.9426,
-  "auc_personal_loan": 0.9387,
-  "auc_savings": 0.8685,
-  "lift_top_decile_auto_loan": 7.05,
-  "lift_top_decile_cd": 6.62,
-  "lift_top_decile_credit_card": 6.76,
-  "lift_top_decile_heloc": 7.67,
-  "lift_top_decile_money_market": 6.96,
-  "lift_top_decile_mortgage": 7.47,
-  "lift_top_decile_overall": 8.1148,
-  "lift_top_decile_personal_loan": 8.37,
-  "lift_top_decile_savings": 5.82,
-  "test_positives": 1029.0,
-  "test_rows": 278583.0,
-  "train_positives": 3081.0,
-  "train_rows": 833830.0
+  "auc_auto_loan": 0.9141,
+  "auc_cd": 0.9314,
+  "auc_credit_card": 0.9097,
+  "auc_heloc": 0.953,
+  "auc_money_market": 0.9144,
+  "auc_mortgage": 0.9489,
+  "auc_overall": 0.9532,
+  "auc_personal_loan": 0.9369,
+  "auc_savings": 0.8708,
+  "lift_top_decile_auto_loan": 7.57,
+  "lift_top_decile_cd": 7.46,
+  "lift_top_decile_credit_card": 7.02,
+  "lift_top_decile_heloc": 9.17,
+  "lift_top_decile_money_market": 7.1,
+  "lift_top_decile_mortgage": 8.11,
+  "lift_top_decile_overall": 8.4593,
+  "lift_top_decile_personal_loan": 8.89,
+  "lift_top_decile_savings": 6.26,
+  "test_positives": 993.0,
+  "test_rows": 275992.0,
+  "train_positives": 3114.0,
+  "train_rows": 825475.0
 }
 
 ## SQL checks
@@ -198,21 +199,22 @@ unknown        2                     2          789.0              0.9        36
 ## Recommendations: customers covered and #1 product mix
 product        customers_with_this_as_top1  avg_propensity  avg_lift_vs_base  avg_clv_uplift_if_adopted  total_expected_clv_uplift
 -------------  ---------------------------  --------------  ----------------  -------------------------  -------------------------
-personal_loan  1658                         0.0101          8.5               1211.0                     22730.0                  
-mortgage       1283                         0.0188          9.0               5693.0                     137030.0                 
-heloc          1114                         0.0066          12.6              2894.0                     21915.0                  
-money_market   745                          0.0273          17.1              2838.0                     57804.0                  
-credit_card    668                          0.1122          9.2               1807.0                     122386.0                 
-cd             510                          0.0358          18.2              1765.0                     32986.0                  
-auto_loan      484                          0.0586          17.1              1508.0                     44166.0                  
-savings        414                          0.2093          8.5               732.0                      61775.0                  
+mortgage       1488                         0.0191          8.7               5710.0                     160966.0                 
+heloc          983                          0.0074          12.9              2887.0                     21556.0                  
+money_market   947                          0.0185          11.1              2851.0                     48333.0                  
+personal_loan  678                          0.0271          20.9              1241.0                     24434.0                  
+cd             594                          0.0262          13.3              1807.0                     26888.0                  
+auto_loan      537                          0.0484          14.2              1497.0                     39989.0                  
+credit_card    490                          0.12            9.4               1590.0                     86639.0                  
+savings        312                          0.2224          8.2               722.0                      47982.0                  
 
 ## Sample recommendations with supporting signals (synthetic customers)
-customer_360_id  rnk  product       propensity  lift   clv_now  clv_with  signals                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
----------------  ---  ------------  ----------  -----  -------  --------  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-C50089561        1    credit_card   0.9423      77.0   7938.0   11520.0   Viewed the credit card page 2 times online in the last 90 days | Started an online application for a credit card in the last 90 days | Currently holds: checking account, savings account, certificate of deposit, personal loan | Banks with us for checking but has no card with us | Keeps $80,164 in deposit accounts with the bank | Has $7,778 outstanding on loans with the bank | Logged in to digital banking 0 times in the last 90 days | Customers with a similar profile open a credit card about 77 times as often as the average customer | Customer for 2.5 years, affluent segment                        
-C72144116        1    money_market  0.9361      584.8  12416.0  16813.0   Viewed the money market account page 3 times online in the last 90 days | Started an online application for a money market account in the last 90 days | Currently holds: checking account, savings account, personal loan, credit card | Keeps $15,499 in deposit accounts with the bank | Has $7,307 outstanding on loans with the bank | Spent $7,166 on cards with the bank in the last 12 months | Logged in to digital banking 6 times in the last 90 days | Customers with a similar profile open a money market account about 585 times as often as the average customer | Customer for 5.0 years, affluent segment
-C82646825        1    money_market  0.9216      575.8  378.0    4266.0    Viewed the money market account page 2 times online in the last 90 days | Started an online application for a money market account in the last 90 days | Currently holds: checking account | Keeps $1,781 in deposit accounts with the bank | Logged in to digital banking 2 times in the last 90 days | Customers with a similar profile open a money market account about 576 times as often as the average customer | Joined the bank in the last month, affluent segment                                                                                                                                               
+customer_360_id  rnk  product       propensity  lift   clv_now  clv_with  signals                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+---------------  ---  ------------  ----------  -----  -------  --------  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+C82381259        1    mortgage      0.7433      341.4  714.0    5896.0    Viewed the mortgage page 4 times online in the last 90 days | Currently holds: checking account | Keeps $6,036 in deposit accounts with the bank | Logged in to digital banking 7 times in the last 90 days | Customers with a similar profile open a mortgage about 341 times as often as the average customer | Customer for 0.6 years, mass segment                                                                                                                      
+C82381259        2    auto_loan     0.0121      3.6    714.0    2074.0    Viewed the auto loan page 1 time online in the last 90 days | Currently holds: checking account | Keeps $6,036 in deposit accounts with the bank | Logged in to digital banking 7 times in the last 90 days | Customers with a similar profile open a auto loan about 4 times as often as the average customer | Customer for 0.6 years, mass segment                                                                                                                       
+C82646825        1    money_market  0.9819      589.4  378.0    4266.0    Viewed the money market account page 2 times online in the last 90 days | Started an online application for a money market account in the last 90 days | Currently holds: checking account | Keeps $1,781 in deposit accounts with the bank | Logged in to digital banking 2 times in the last 90 days | Customers with a similar profile open a money market account about 589 times as often as the average customer | Joined the bank in the last month, affluent segment
+UDG42843096      1    mortgage      0.7442      341.8  0.0      5340.0    Viewed the mortgage page 4 times online in the last 90 days | Started an online application for a mortgage in the last 90 days | Currently holds: no active products | Logged in to digital banking 5 times in the last 90 days | Customers with a similar profile open a mortgage about 342 times as often as the average customer | Joined the bank in the last month, unknown segment                                                                                    
 
 ## Row filter attached to the new tables
 table_name                       filter_name                                         
