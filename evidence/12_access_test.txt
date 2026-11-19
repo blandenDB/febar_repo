@@ -1,0 +1,103 @@
+# Evidence 12: access test with a real non-admin identity
+# Captured 2026-11-19T18:38:39Z by tools/access_test.py. Synthetic data; user identities redacted.
+
+Principal: service principal 'c360-access-tester' (application ID af6d82a7-ba2b-4941-9e4b-8bdfade5ee90); workspace admin: False; workspace entitlements: ['databricks-sql-access']
+UC grants: USE CATALOG c360_bank, USE SCHEMA customer_lifetime_value, SELECT on gold_customer_360 and gold_product_holdings only. SQL warehouse: CAN_USE. Entitlements are set by the data owner, not the principal.
+
+==================== business_analyst ====================
+
+## who am I
+principal                           
+------------------------------------
+af6d82a7-ba2b-4941-9e4b-8bdfade5ee90
+
+## call the policy function directly (no EXECUTE grant)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+## rows visible
+customers  branches                                                                                                                                               holdings
+---------  -----------------------------------------------------------------------------------------------------------------------------------------------------  --------
+50195      BR001,BR002,BR003,BR004,BR005,BR006,BR007,BR008,BR009,BR010,BR011,BR012,BR013,BR014,BR015,BR016,BR017,BR018,BR019,BR020,BR021,BR022,BR023,BR024,BR025  161160  
+
+## sample rows
+customer_360_id  first_name    last_name     email         date_of_birth  age  home_branch_id
+---------------  ------------  ------------  ------------  -------------  ---  --------------
+C10001523        ***MASKED***  ***MASKED***  ***MASKED***  NULL           53   BR010         
+C10003087        ***MASKED***  ***MASKED***  ***MASKED***  NULL           20   BR022         
+C10004010        ***MASKED***  ***MASKED***  ***MASKED***  NULL           46   BR011         
+
+## read silver PII (not granted)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+## read the entitlement table (not granted)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+## change own entitlement (not granted)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+==================== relationship_banker (BR003, BR004) ====================
+
+## who am I
+principal                           
+------------------------------------
+af6d82a7-ba2b-4941-9e4b-8bdfade5ee90
+
+## call the policy function directly (no EXECUTE grant)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+## rows visible
+customers  branches     holdings
+---------  -----------  --------
+6672       BR003,BR004  21575   
+
+## sample rows
+customer_360_id  first_name  last_name  email                           date_of_birth  age  home_branch_id
+---------------  ----------  ---------  ------------------------------  -------------  ---  --------------
+C10032709        Charles     Young      charles.young10656@example.com  1996-05-23     30   BR004         
+C10106954        James       King       james.king1223@example.com      1979-07-19     47   BR003         
+C10112570        Robert      Hill       robert.hill38382@example.com    2007-08-15     19   BR003         
+
+## read silver PII (not granted)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+## read the entitlement table (not granted)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+## change own entitlement (not granted)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+==================== no entitlement (row removed) ====================
+
+## who am I
+principal                           
+------------------------------------
+af6d82a7-ba2b-4941-9e4b-8bdfade5ee90
+
+## call the policy function directly (no EXECUTE grant)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+## rows visible
+customers  branches  holdings
+---------  --------  --------
+0                    0       
+
+## sample rows
+customer_360_id  first_name  last_name  email  date_of_birth  age  home_branch_id
+---------------  ----------  ---------  -----  -------------  ---  --------------
+
+## read silver PII (not granted)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+## read the entitlement table (not granted)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+## change own entitlement (not granted)
+DENIED/ERROR: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+
+==================== data owner check (expected banker count) ====================
+home_branch_id  customers
+--------------  ---------
+BR003           3334     
+BR004           3338     
+
+Cleanup: test entitlement removed; the principal's OAuth secret was deleted after the test.
